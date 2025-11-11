@@ -1,0 +1,42 @@
+from database import create_db
+
+from rekening import Rekening
+
+db = create_db()
+
+class Nasabah:
+    def __init__(self, nama: str, password: str, email: str, nomor_telepon: str, alamat: str):
+        self.__nama = nama
+        self.__password = password # belum di-hash
+        self.__email = email
+        self.__nomor_telepon = nomor_telepon
+        self.__alamat = alamat
+
+        query = 'INSERT INTO nasabah (nama, password, email, nomor_telepon, alamat) VALUES (%s, %s, %s, %s, %s)'
+        values = (self.__nama, self.__password, self.__email, self.__nomor_telepon, self.__alamat)
+
+        self.__id = db.exec_query(query, values)
+
+        self.rekening = Rekening(self.__id)
+    
+    def telepon(self):
+        print(f'Sedang menghubung {self.__nama} ({self.__nomor_telepon})...')
+    
+    @property
+    def nama(self) -> str:
+        return self.__nama
+    
+    @property
+    def email(self) -> str:
+        return self.__email
+    
+    @property
+    def nomor_telepon(self) -> str:
+        return self.__nomor_telepon
+    
+    @property
+    def alamat(self) -> str:
+        return self.__alamat
+    
+    # def commit():
+    #     pass
