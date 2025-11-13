@@ -11,11 +11,6 @@ class Transaksi:
     WITHDRAW = 2
     TRANSFER = 3
 
-def nasabah_baru(nama: str, password: str, email: str, nomor_telepon: str, alamat: str):
-    nasabah = Nasabah(nama, password, email, nomor_telepon, alamat)
-
-    return nasabah
-
 # def transaksi(
 #     jenis: Literal[Transaksi.DEPOSIT, Transaksi.WITHDRAW, Transaksi.TRANSFER],
 #     jumlah_uang: int,
@@ -29,6 +24,6 @@ def nasabah_baru(nama: str, password: str, email: str, nomor_telepon: str, alama
 
 
 # Testing
-n = nasabah_baru('Don', '123', '123@123.com', '081231231111', 'aj')
+n = Nasabah('Don', '123', '123@123.com', '081231231111', 'aj')
 n.rekening.tambah_saldo(1000)
 print(n.rekening.saldo)
