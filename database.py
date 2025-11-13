@@ -1,6 +1,9 @@
 import mysql.connector as mysql_conn
 
 class Database:
+    DUPLICATE_ERRNO = 1062
+    NOT_NULL_ERRNO = 1048
+
     def __init__(self):
         self.db = mysql_conn.connect(
             host = 'localhost',
@@ -10,14 +13,6 @@ class Database:
         )
 
         self.cursor = self.db.cursor()
-    
-    @property
-    def DUPLICATE_ERRNO(self):
-        return 1062
-    
-    @property
-    def NOT_NULL_ERRNO(self):
-        return 1048
 
     def exec_query(self, query, val=None):
         if val is None:
@@ -34,7 +29,7 @@ class Database:
         self.db.commit()
         return self.cursor.lastrowid
     
-    def fetch(self, query):
+    def fetch(self, query, values):
         self.cursor.execute(query)
         return self.cursor.fetchall()
     

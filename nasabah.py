@@ -4,7 +4,7 @@ import bcrypt
 
 from database import connect_db
 from rekening import Rekening
-from CustomError import ValidationError, DatabaseError
+from CustomError import ValidationError, DatabaseError, Status, ErrorType, ValidationErrorCode
 
 db = connect_db()
 
@@ -19,11 +19,11 @@ class Nasabah:
         nomor_telepon = nomor_telepon.strip()
         alamat = alamat.strip()
 
-        errors = Nasabah.validate_parameter(nama, password, email, nomor_telepon, alamat)
-        if(len(errors) > 0):
+        validation_errors = Nasabah.validate_parameter(nama, password, email, nomor_telepon, alamat)
+        if validation_errors:
             raise ValidationError({
-                'status': 'error',
-                'type': 'validation',
+                'status': Status.ERROR,
+                'type': ErrorType.VALIDATION,
                 'errors': errors
             })
 
@@ -38,12 +38,11 @@ class Nasabah:
         self.rekening = Rekening(self.__id)
     
     @staticmethod
-    def hash_password(self, password: str):
+    def hash_password(password: str):
         return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     
     @staticmethod
     def validate_parameter(
-        self,
         nama: str,
         password: str,
         email: str,
@@ -52,68 +51,68 @@ class Nasabah:
     ):
         errors = []
 
-        email_duplicate_query = 'SELECT * FROM nasabah WHERE email=%s'
+        email_duplicate_query = "SELECT * FROM nasabah WHERE email='%s'"
         email_duplicate_values = (email,)
 
-        nomor_telepon_duplicate_query = 'SELECT * FROM nasabah WHERE nomor_telepon=%s'
+        nomor_telepon_duplicate_query = "SELECT * FROM nasabah WHERE nomor_telepon='%s'"
         nomor_telepon_duplicate_values = (nomor_telepon,)
 
         if not nama:
             errors.append({
                 'field': 'nama', 
-                'code': 'EMPTY', 
+                'code': ValidationErrorCode.EMPTY, 
                 'message': 'Nama tidak bisa kosong'
             })
 
         if not password:
             errors.append({
                 'field': 'password', 
-                'code': 'EMPTY', 
+                'code': ValidationErrorCode.EMPTY, 
                 'message': 'Password tidak bisa kosong'
             })
 
         if not email:
             errors.append({
                 'field': 'email', 
-                'code': 'EMPTY', 
+                'code': ValidationErrorCode.EMPTY, 
                 'message': 'Email tidak bisa kosong'
             })
         elif not re.match(EMAIL_REGEX, email):
             errors.append({
                 'field': 'email', 
-                'code': 'INVALID_FORMAT', 
+                'code': ValidationErrorCode.INVALID_FORMAT, 
                 'message': f'Format email {email} tidak benar'
             })
         elif db.fetch(email_duplicate_query, email_duplicate_values):
             errors.append({
                 'field': 'email', 
-                'code': 'DUPLICATE', 
+                'code': ValidationErrorCode.DUPLICATE, 
                 'message': 'Email sudah digunakan'
             })
             
         if not nomor_telepon:
             errors.append({
                 'field': 'nomor_telepon', 
-                'code': 'EMPTY', 'message': 
-                'Nomor telepon tidak bisa kosong'
+                'code': ValidationErrorCode.EMPTY,
+                'message': 'Nomor telepon tidak bisa kosong'
             })
         elif not re.match(PHONE_REGEX, nomor_telepon):
             errors.append({
                 'field': 'nomor_telepon',
-                'code': 'INVALID_FORMAT',
+                'code': ValidationErrorCode.INVALID_FORMAT,
                 'message': f'Format nomor telepon {nomor_telepon} tidak benar'
             })
         elif db.fetch(nomor_telepon_duplicate_query, nomor_telepon_duplicate_values):
             errors.append({
                 'field': 'nomor_telepon',
-                'code': 'DUPLICATE',
+                'code': ValidationErrorCode.DUPLICATE,
                 'message': 'Nomor telepon sudah digunakan'
             })
 
         if not alamat:
             errors.append({
                 'field': 'alamat',
-                'code': 'EMPTY',
+                'code': ValidationErrorCode.EMPTY,
                 'message': 'Alamat tidak bisa kosong'
             })
 
@@ -125,7 +124,6 @@ class Nasabah:
 
         try:
             last_row_id = db.exec_insert_query(query, values)
-            db.commit()
 
             return last_row_id
         except mysql.connector.IntegrityError as e:
@@ -136,28 +134,28 @@ class Nasabah:
                 field = str(e).split("for key '")[1].split("'")[0]
 
                 raise DatabaseError({
-                    'status': 'error',
-                    'type': 'database',
+                    'status': Status.ERROR,
+                    'type': ErrorType.DATABASE,
                     'message': f'Tidak dapat membuat nasabah "{self.__nama}" dikarenakan "{field}" duplikat'
                 })
             elif errno == db.NOT_NULL_ERRNO:
                 field = str(e).split("Column '")[1].split("'")[0]
 
                 raise DatabaseError({
-                    'status': 'error',
-                    'type': 'database',
+                    'status': Status.ERROR,
+                    'type': ErrorType.DATABASE,
                     'message': f'Tidak dapat membuat nasabah "{self.__nama}" dikarenakan "{field}" tidak boleh kosong'
                 })
             else:
                 raise DatabaseError({
-                    'status': 'error',
-                    'type': 'database',
+                    'status': Status.ERROR,
+                    'type': ErrorType.DATABASE,
                     'message': f'Integrity error saat membuat nasabah.\n{e}'
                 })
         except Exception as e:
             raise DatabaseError({
-                'status': 'error',
-                'type': 'database',
+                'status': Status.ERROR,
+                'type': ErrorType.DATABASE,
                 'message': f'Error saat membuat nasabah.\n{e}'
             })
 
