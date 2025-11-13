@@ -3,7 +3,7 @@ import re
 
 from database import connect_db
 from rekening import Rekening
-from CustomError import ValidationError
+from CustomError import ValidationError, DatabaseError
 
 db = connect_db()
 
@@ -22,6 +22,7 @@ class Nasabah:
         if(len(errors) > 0):
             raise ValidationError({
                 'status': 'error',
+                'type': 'validation',
                 'errors': errors
             })
 
@@ -45,20 +46,70 @@ class Nasabah:
     ):
         errors = []
 
+        email_duplicate_query = 'SELECT * FROM nasabah WHERE email=%s'
+        email_duplicate_values = (email,)
+
+        nomor_telepon_duplicate_query = 'SELECT * FROM nasabah WHERE nomor_telepon=%s'
+        nomor_telepon_duplicate_values = (nomor_telepon,)
+
         if not nama:
-            errors.append({'field': 'nama', 'code': 'EMPTY', 'message': 'Nama tidak bisa kosong'})
+            errors.append({
+                'field': 'nama', 
+                'code': 'EMPTY', 
+                'message': 'Nama tidak bisa kosong'
+            })
+
         if not password:
-            errors.append({'field': 'password', 'code': 'EMPTY', 'message': 'Password tidak bisa kosong'})
+            errors.append({
+                'field': 'password', 
+                'code': 'EMPTY', 
+                'message': 'Password tidak bisa kosong'
+            })
+
         if not email:
-            errors.append({'field': 'email', 'code': 'EMPTY', 'message': 'Email tidak bisa kosong'})
+            errors.append({
+                'field': 'email', 
+                'code': 'EMPTY', 
+                'message': 'Email tidak bisa kosong'
+            })
         elif not re.match(EMAIL_REGEX, email):
-            errors.append({'field': 'email', 'code': 'INVALID_FORMAT', 'message': f'Format email {email} tidak benar'})
+            errors.append({
+                'field': 'email', 
+                'code': 'INVALID_FORMAT', 
+                'message': f'Format email {email} tidak benar'
+            })
+        elif db.fetch(email_duplicate_query, email_duplicate_values):
+            errors.append({
+                'field': 'email', 
+                'code': 'DUPLICATE', 
+                'message': 'Email sudah digunakan'
+            })
+            
         if not nomor_telepon:
-            errors.append({'field': 'nomor_telepon', 'code': 'EMPTY', 'message': 'Nomor telepon tidak bisa kosong'})
+            errors.append({
+                'field': 'nomor_telepon', 
+                'code': 'EMPTY', 'message': 
+                'Nomor telepon tidak bisa kosong'
+            })
         elif not re.match(PHONE_REGEX, nomor_telepon):
-            errors.append({'field': 'nomor_telepon', 'code': 'INVALID_FORMAT', 'message': f'Format nomor telepon {nomor_telepon} tidak benar'})
+            errors.append({
+                'field': 'nomor_telepon',
+                'code': 'INVALID_FORMAT',
+                'message': f'Format nomor telepon {nomor_telepon} tidak benar'
+            })
+        elif db.fetch(nomor_telepon_duplicate_query, nomor_telepon_duplicate_values):
+            errors.append({
+                'field': 'nomor_telepon',
+                'code': 'DUPLICATE',
+                'message': 'Nomor telepon sudah digunakan'
+            })
+
         if not alamat:
-            errors.append({'field': 'alamat', 'code': 'EMPTY', 'message': 'Alamat tidak bisa kosong'})
+            errors.append({
+                'field': 'alamat',
+                'code': 'EMPTY',
+                'message': 'Alamat tidak bisa kosong'
+            })
 
         return errors
 
@@ -73,20 +124,37 @@ class Nasabah:
             return last_row_id
         except mysql.connector.IntegrityError as e:
             db.rollback()
-
             errno = e.errno
 
             if errno == db.DUPLICATE_ERRNO:
-                field = str(e).split('for key '')[1].split(''')[0]
+                field = str(e).split("for key '")[1].split("'")[0]
 
-                raise ValueError(f'Tidak dapat membuat nasabah "{self.__nama}" dikarenakan "{field}" duplikat')
+                raise DatabaseError({
+                    'status': 'error',
+                    'type': 'database',
+                    'message': f'Tidak dapat membuat nasabah "{self.__nama}" dikarenakan "{field}" duplikat'
+                })
             elif errno == db.NOT_NULL_ERRNO:
-                field = str(e).split('Column '')[1].split(''')[0]
-                raise ValueError(f'Tidak dapat membuat nasabah "{self.__nama}" dikarenakan "{field}" tidak boleh kosong')
+                field = str(e).split("Column '")[1].split("'")[0]
+
+                raise DatabaseError({
+                    'status': 'error',
+                    'type': 'database',
+                    'message': f'Tidak dapat membuat nasabah "{self.__nama}" dikarenakan "{field}" tidak boleh kosong'
+                })
             else:
-                raise RuntimeError(f'Integrity error saat membuat nasabah.\n{e}')
+                raise DatabaseError({
+                    'status': 'error',
+                    'type': 'database',
+                    'message': f'Integrity error saat membuat nasabah.\n{e}'
+                })
         except Exception as e:
-            raise RuntimeError(f'Error saat membuat nasabah.\n{e}')
+            raise DatabaseError({
+                'status': 'error',
+                'type': 'database',
+                'message': f'Error saat membuat nasabah.\n{e}'
+            })
+
 
     def telepon(self):
         print(f'Sedang menghubung {self.__nama} ({self.__nomor_telepon})...')
