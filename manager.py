@@ -29,6 +29,6 @@ def nasabah_baru(nama: str, password: str, email: str, nomor_telepon: str, alama
 
 
 # Testing
-n = nasabah_baru('Don', '123', '123@123.com', '09123123', 'aj')
+n = nasabah_baru('Don', '123', '123@123.com', '0812312311', 'aj')
 n.rekening.tambah_saldo(1000)
 print(n.rekening.saldo)

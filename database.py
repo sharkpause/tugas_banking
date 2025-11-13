@@ -9,8 +9,16 @@ class Database:
             database = 'banking'
         )
 
-        self.cursor = self.db.cursor();
+        self.cursor = self.db.cursor()
     
+    @property
+    def DUPLICATE_ERRNO(self):
+        return 1062
+    
+    @property
+    def NOT_NULL_ERRNO(self):
+        return 1048
+
     def exec_query(self, query, val=None):
         if val is None:
             self.cursor.execute(query)
@@ -29,6 +37,9 @@ class Database:
     def fetch(self, query):
         self.cursor.execute(query)
         return self.cursor.fetchall()
+    
+    def rollback(self):
+        self.db.rollback()
 
 def connect_db():
     return Database()
