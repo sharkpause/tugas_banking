@@ -12,13 +12,16 @@ class Nasabah:
         self.__nomor_telepon = nomor_telepon
         self.__alamat = alamat
 
-        query = 'INSERT INTO nasabah (nama, password, email, nomor_telepon, alamat) VALUES (%s, %s, %s, %s, %s)'
-        values = (self.__nama, self.__password, self.__email, self.__nomor_telepon, self.__alamat)
-
-        self.__id = db.exec_insert_query(query, values)
+        self.__id = create_in_database()
 
         self.rekening = Rekening(self.__id)
     
+    def create_in_database(self):
+        query = 'INSERT INTO nasabah (nama, password, email, nomor_telepon, alamat) VALUES (%s, %s, %s, %s, %s)'
+        values = (self.__nama, self.__password, self.__email, self.__nomor_telepon, self.__alamat)
+
+        return db.exec_insert_query(query, values)
+
     def telepon(self):
         print(f'Sedang menghubung {self.__nama} ({self.__nomor_telepon})...')
     
