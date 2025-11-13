@@ -12,7 +12,7 @@ class Nasabah:
         self.__nomor_telepon = nomor_telepon
         self.__alamat = alamat
 
-        self.__id = create_in_database()
+        self.__id = self.create_in_database()
 
         self.rekening = Rekening(self.__id)
     
