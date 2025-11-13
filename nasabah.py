@@ -12,6 +12,17 @@ EMAIL_REGEX = r'^[\w\.-]+@[\w\.-]+\.\w+$'
 PHONE_REGEX = r'^08\d{8,11}$'
 
 class Nasabah:
+    """
+
+    Nasabah merepresentasi row data dalam database dalam bentuk object
+    untuk lebih mudah interaksi oleh server developer.
+    
+    Sudah meng-handle validation, password hashing, dan database interaction.
+    
+    Server developer tidak direkomendasikan untuk memodifikasi tabel nasabah
+    secara langsung dalam database di luar method-method dalam class ini.
+
+    """
     def __init__(self, nama: str, password: str, email: str, nomor_telepon: str, alamat: str):
         nama = nama.strip()
         password = password.strip()
@@ -19,7 +30,7 @@ class Nasabah:
         nomor_telepon = nomor_telepon.strip()
         alamat = alamat.strip()
 
-        validation_errors = Nasabah.validate_parameter(nama, password, email, nomor_telepon, alamat)
+        validation_errors = Nasabah.__validate_parameter(nama, password, email, nomor_telepon, alamat)
         if validation_errors:
             raise ValidationError({
                 'status': Status.ERROR,
@@ -28,21 +39,21 @@ class Nasabah:
             })
 
         self.__nama = nama
-        self.__password = Nasabah.hash_password(password)
+        self.__password = Nasabah.__hash_password(password)
         self.__email = email
         self.__nomor_telepon = nomor_telepon
         self.__alamat = alamat
 
-        self.__id = self.create_in_database()
+        self.__id = self.__create_in_database()
 
         self.rekening = Rekening(self.__id)
     
     @staticmethod
-    def hash_password(password: str):
+    def __hash_password(password: str):
         return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     
     @staticmethod
-    def validate_parameter(
+    def __validate_parameter(
         nama: str,
         password: str,
         email: str,
@@ -118,7 +129,7 @@ class Nasabah:
 
         return errors
 
-    def create_in_database(self):
+    def __create_in_database(self):
         query = 'INSERT INTO nasabah (nama, password, email, nomor_telepon, alamat) VALUES (%s, %s, %s, %s, %s)'
         values = (self.__nama, self.__password, self.__email, self.__nomor_telepon, self.__alamat)
 
