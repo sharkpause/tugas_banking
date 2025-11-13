@@ -19,7 +19,7 @@ class Nasabah:
         alamat = alamat.strip()
 
         errors = self.validate_parameter(nama, password, email, nomor_telepon, alamat)
-        if(len(errors) == 0):
+        if(len(errors) > 0):
             raise ValidationError({
                 'status': 'error',
                 'errors': errors
