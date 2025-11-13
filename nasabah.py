@@ -1,5 +1,6 @@
 import mysql.connector
 import re
+import bcrypt
 
 from database import connect_db
 from rekening import Rekening
@@ -18,7 +19,7 @@ class Nasabah:
         nomor_telepon = nomor_telepon.strip()
         alamat = alamat.strip()
 
-        errors = self.validate_parameter(nama, password, email, nomor_telepon, alamat)
+        errors = Nasabah.validate_parameter(nama, password, email, nomor_telepon, alamat)
         if(len(errors) > 0):
             raise ValidationError({
                 'status': 'error',
@@ -27,7 +28,7 @@ class Nasabah:
             })
 
         self.__nama = nama
-        self.__password = password # belum di-hash
+        self.__password = Nasabah.hash_password(password)
         self.__email = email
         self.__nomor_telepon = nomor_telepon
         self.__alamat = alamat
@@ -36,6 +37,11 @@ class Nasabah:
 
         self.rekening = Rekening(self.__id)
     
+    @staticmethod
+    def hash_password(self, password: str):
+        return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    
+    @staticmethod
     def validate_parameter(
         self,
         nama: str,
