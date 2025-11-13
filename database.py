@@ -17,11 +17,18 @@ class Database:
         else:
             self.cursor.execute(query, val)
         self.db.commit()
+    
+    def exec_insert_query(self, query, val=None):
+        if val is None:
+            self.cursor.execute(query)
+        else:
+            self.cursor.execute(query, val)
+        self.db.commit()
         return self.cursor.lastrowid
     
     def fetch(self, query):
         self.cursor.execute(query)
         return self.cursor.fetchall()
 
-def create_db():
+def connect_db():
     return Database()

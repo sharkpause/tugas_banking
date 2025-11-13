@@ -1,8 +1,8 @@
-from database import create_db
+from database import connect_db
 
 from rekening import Rekening
 
-db = create_db()
+db = connect_db()
 
 class Nasabah:
     def __init__(self, nama: str, password: str, email: str, nomor_telepon: str, alamat: str):
@@ -15,7 +15,7 @@ class Nasabah:
         query = 'INSERT INTO nasabah (nama, password, email, nomor_telepon, alamat) VALUES (%s, %s, %s, %s, %s)'
         values = (self.__nama, self.__password, self.__email, self.__nomor_telepon, self.__alamat)
 
-        self.__id = db.exec_query(query, values)
+        self.__id = db.exec_insert_query(query, values)
 
         self.rekening = Rekening(self.__id)
     

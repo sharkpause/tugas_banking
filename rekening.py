@@ -1,7 +1,7 @@
 import random
 
-from database import create_db
-db = create_db()
+from database import connect_db
+db = connect_db()
 
 class Rekening:
     def generate_nomor_rekening(self):
