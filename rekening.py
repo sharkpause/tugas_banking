@@ -2,26 +2,26 @@ import random
 
 from typing import Tuple
 
-from database import connect_db
+from database import Database
 from CustomClasses import DataChanges
 
-db = connect_db()
+db = Database()
+
+def generate_nomor_rekening() -> str:
+    return ''.join(str(random.randint(0, 9)) for _ in range(20))
 
 class Rekening:
-    def __init__(self, id_nasabah: int):
-        self.__nomor_rekening: str = Rekening.__generate_nomor_rekening()
-        self.__jumlah_saldo: int = 0
+    def __init__(self, id_nasabah: int, nomor_rekening: str = generate_nomor_rekening(), jumlah_saldo: int = 0):
+        self.__nomor_rekening: str = nomor_rekening
+        self.__jumlah_saldo: int = jumlah_saldo
         
         self.__id_pemilik: int = id_nasabah
-
+    
+    def __create_in_database(self):
         query: str = 'INSERT INTO rekening (id_nasabah, nomor_rekening, jumlah_saldo) VALUES (%s, %s, %s)'
         values: Tuple = (self.__id_pemilik, self.__nomor_rekening, self.__jumlah_saldo)
 
         db.exec_query(query, values)
-    
-    @staticmethod
-    def __generate_nomor_rekening(self) -> str:
-        return ''.join(str(random.randint(0, 9)) for _ in range(20))
 
     def tambah_saldo(self, jumlah_uang: int) -> None:
         self.__jumlah_saldo += jumlah_uang
@@ -34,7 +34,7 @@ class Rekening:
         self.commit(DataChanges.JUMLAH_SALDO)
     
     @property
-    def saldo(self) -> int:
+    def jumlah_saldo(self) -> int:
         return self.__jumlah_saldo
     
     @property

@@ -7,17 +7,22 @@ class DatabaseError(Exception):
         self.errors = errors
 
 class Status:
-    ERROR = 'error'
-    SUCCESS = 'success'
+    ERROR: int = 1
+    SUCCESS: int = 0
 
 class ErrorType:
-    VALIDATION = 'validation'
-    DATABASE = 'database'
+    VALIDATION: int = 1
+    DATABASE: int = 2
 
 class ValidationErrorCode:
-    EMPTY = 'empty'
-    INVALID_FORMAT = 'invalid format'
-    DUPLICATE = 'duplicate'
+    EMPTY: int = 1
+    INVALID_FORMAT: int = 2
+    DUPLICATE: int = 3
 
 class DataChanges:
-    JUMLAH_SALDO = 1
+    JUMLAH_SALDO: int = 1
+
+class JenisTransaksi:
+    DEPOSIT: int = 1
+    WITHDRAW: int = 2
+    TRANSFER: int = 3

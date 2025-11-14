@@ -4,11 +4,12 @@ import bcrypt
 
 from typing import List, Dict, Tuple
 
-from database import connect_db
+from database import Database
 from rekening import Rekening
 from CustomClasses import ValidationError, DatabaseError, Status, ErrorType, ValidationErrorCode
+from utilitas import nomor_telepon_ke_Rekening
 
-db = connect_db()
+db = Database()
 
 EMAIL_REGEX = r'^[\w\.-]+@[\w\.-]+\.\w+$'
 PHONE_REGEX = r'^08\d{8,11}$'
@@ -37,7 +38,7 @@ class Nasabah:
             raise ValidationError({
                 'status': Status.ERROR,
                 'type': ErrorType.VALIDATION,
-                'errors': errors
+                'errors': validation_errors
             })
 
         self.__nama: str = nama
@@ -46,10 +47,11 @@ class Nasabah:
         self.__nomor_telepon: str = nomor_telepon
         self.__alamat: str = alamat
 
-        self.__id: int = self.__create_in_database()
+        try:
+            self.rekening: Rekening = nomor_telepon_ke_Rekening(nomor_telepon_ke_Rekening)
+        except:
+            self.rekening: Rekening = None
 
-        self.rekening: Rekening = Rekening(self.__id)
-    
     @staticmethod
     def __hash_password(password: str) -> str:
         return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
@@ -64,10 +66,10 @@ class Nasabah:
     ) -> List[Dict]:
         errors: List[Dict] = []
 
-        email_duplicate_query: str = "SELECT * FROM nasabah WHERE email='%s'"
+        email_duplicate_query: str = "SELECT * FROM nasabah WHERE email=%s"
         email_duplicate_values: Tuple = (email,)
 
-        nomor_telepon_duplicate_query: str = "SELECT * FROM nasabah WHERE nomor_telepon='%s'"
+        nomor_telepon_duplicate_query: str = "SELECT * FROM nasabah WHERE nomor_telepon=%s"
         nomor_telepon_duplicate_values: Tuple = (nomor_telepon,)
 
         if not nama:
@@ -131,14 +133,21 @@ class Nasabah:
 
         return errors
 
+    def buat_rekening_baru(self) -> Status:
+        if not self.__id:
+            return { 'status': Status.ERROR, 'message': "Can't create a new rekening before a new nasabah in the database" }
+        
+        self.rekening = Rekening(self.__id)
+
     def __create_in_database(self) -> int:
         query: str = 'INSERT INTO nasabah (nama, password, email, nomor_telepon, alamat) VALUES (%s, %s, %s, %s, %s)'
         values: Tuple = (self.__nama, self.__password, self.__email, self.__nomor_telepon, self.__alamat)
 
         try:
             last_row_id: int = db.exec_insert_query(query, values)
+            self.__id = last_row_id
 
-            return last_row_id
+            return Status.SUCCESS
         except mysql.connector.IntegrityError as e:
             db.rollback()
             errno: int = e.errno
@@ -194,3 +203,9 @@ class Nasabah:
     
     # def commit():
     #     pass
+
+
+
+# Testing
+n = Nasabah('Don', '123', '123@321.com', '081331509015', 'Jl. Asia')
+print(n.nama)
