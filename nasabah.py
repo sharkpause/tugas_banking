@@ -136,7 +136,7 @@ class Nasabah:
 
         return errors
 
-    def __buat_rekening_baru(self) -> Status:
+    def __buat_rekening_baru(self) -> Status.SUCCESS | Status.ERROR:
         if not self.__id:
             raise DatabaseError({
                     'status': Status.ERROR,
@@ -149,7 +149,7 @@ class Nasabah:
 
         return Status.SUCCESS
 
-    def __create_in_database(self) -> int:
+    def __create_in_database(self) -> Status.SUCCESS | Status.ERROR:
         query: str = 'INSERT INTO nasabah (nama, password, email, nomor_telepon, alamat) VALUES (%s, %s, %s, %s, %s)'
         values: tuple = (self.__nama, self.__password, self.__email, self.__nomor_telepon, self.__alamat)
 

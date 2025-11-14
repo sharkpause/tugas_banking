@@ -1,7 +1,7 @@
 import random
 
 from database import Database
-from CustomClasses import DataChanges
+from CustomClasses import DataChanges, Status
 
 from utilitas import nomor_rekening_ke_Rekening
 
@@ -38,21 +38,27 @@ class Rekening:
         
         self.__id_pemilik: int = id_nasabah
     
-    def __create_in_database(self):
+    def __create_in_database(self) -> Status.SUCCESS | Status.ERROR:
         query: str = 'INSERT INTO rekening (id_nasabah, nomor_rekening, jumlah_saldo) VALUES (%s, %s, %s)'
         values: tuple = (self.__id_pemilik, self.__nomor_rekening, self.__jumlah_saldo)
 
         db.exec_query(query, values)
 
-    def tambah_saldo(self, jumlah_uang: int) -> None:
+        return Status.SUCCESS
+
+    def tambah_saldo(self, jumlah_uang: int) -> Status.SUCCESS | Status.ERROR:
         self.__jumlah_saldo += jumlah_uang
 
         self.commit(DataChanges.JUMLAH_SALDO)
+
+        return Status.SUCCESS
     
-    def kurang_saldo(self, jumlah_uang: int) -> None:
+    def kurang_saldo(self, jumlah_uang: int) -> Status.SUCCESS | Status.ERROR:
         self.__jumlah_saldo -= jumlah_uang
 
         self.commit(DataChanges.JUMLAH_SALDO)
+
+        return Status.SUCCESS
     
     @property
     def jumlah_saldo(self) -> int:
@@ -66,9 +72,11 @@ class Rekening:
     def id_pemilik(self) -> int:
         return self.__id_pemilik
     
-    def commit(self, changes: DataChanges) -> None:
+    def commit(self, changes: DataChanges) -> Status.SUCCESS | Status.ERROR:
         if changes == DataChanges.JUMLAH_SALDO:
             query: str = 'UPDATE rekening SET jumlah_saldo = %s WHERE nomor_rekening = %s'
             values: tuple = (self.__jumlah_saldo, self.__nomor_rekening)
 
             db.exec_query(query, values)
+        
+        return Status.SUCCESS
