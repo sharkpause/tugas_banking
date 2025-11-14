@@ -18,6 +18,7 @@ class ErrorType:
     VALIDATION: int = 1
     DATABASE: int = 2
     INSUFFICIENT_FUNDS: int = 3
+    MISSING_ARGUMENT: int = 4
 
 class ValidationErrorCode:
     EMPTY: int = 1

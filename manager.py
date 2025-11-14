@@ -25,11 +25,23 @@ def transaksi(
     
     match jenis:
         case JenisTransaksi.DEPOSIT:
-            Rekening_sumber.tambah_saldo(jumlah_uang)
+            Rekening_sumber._Rekening__increase_balance(jumlah_uang)
 
             return Status.SUCCESS
         case JenisTransaksi.WITHDRAW:
-            Rekening_sumber.kurang_saldo(jumlah_uang)
+            Rekening_sumber._Rekening__decrease_balance(jumlah_uang)
+
+            return Status.SUCCESS
+        case JenisTransaksi.TRANSFER:
+            if not Rekening_tujuan:
+                raise TypeError({
+                    'status': Status.ERROR,
+                    'type': ErrorType.MISSING_ARGUMENT,
+                    'message': 'Rekening tujuan tidak bisa kosong'
+                })
+
+            Rekening_sumber._Rekening__decrease_balance(jumlah_uang)
+            Rekening_tujuan._Rekening__increase_balance(jumlah_uang)
 
             return Status.SUCCESS
 
@@ -51,3 +63,5 @@ transaksi(JenisTransaksi.DEPOSIT, 30_000, '2025-11-04 20:29:10', don.rekening)
 
 rachel = buat_nasabah_baru('Rachel', 'password', 'beargirl@finfeed.com', '0813332134145', 'Jl. Asia')
 transaksi(JenisTransaksi.DEPOSIT, 20_000, '2025-11-04 20:29:10', rachel.rekening)
+
+transaksi(JenisTransaksi.TRANSFER, 15_000, '2025-11-04 20:29:10', don.rekening, rachel.rekening)

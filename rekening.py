@@ -61,14 +61,14 @@ class Rekening:
 
         return Status.SUCCESS
 
-    def tambah_saldo(self, jumlah_uang: int) -> Status.SUCCESS | Status.ERROR:
+    def __increase_balance(self, jumlah_uang: int) -> Status.SUCCESS | Status.ERROR:
         self.__jumlah_saldo += jumlah_uang
 
         self.commit(DataChanges.JUMLAH_SALDO)
 
         return Status.SUCCESS
     
-    def kurang_saldo(self, jumlah_uang: int) -> Status.SUCCESS | Status.ERROR:
+    def __decrease_balance(self, jumlah_uang: int) -> Status.SUCCESS | Status.ERROR:
         if jumlah_uang > self.__jumlah_saldo:
             raise InsufficientFundsError({
                 'status': Status.ERROR,
