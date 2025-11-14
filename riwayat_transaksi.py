@@ -45,8 +45,8 @@ class RiwayatTransaksi:
     def datetime_transaksi(self) -> str:
         return self.__datetime_transaksi
 
-    def kesimpulan(self):
-        print(f'Pada {self.__datetime_transaksi} terjadi transaksi {self.__jenis_transaksi} dengan jumlah uang {self.__jumlah_uang} dari {self.__nomor_rekening_sumber} ke {self.__nomor_rekening_tujuan}')
+    def kesimpulan(self) -> str:
+        return f'Pada {self.__datetime_transaksi} terjadi transaksi {self.__jenis_transaksi} dengan jumlah uang {self.__jumlah_uang} dari {self.__nomor_rekening_sumber} ke {self.__nomor_rekening_tujuan}'
     
     # def commit():
     #     pass
