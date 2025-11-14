@@ -24,7 +24,13 @@ def transaksi(
     Rekening_tujuan: Rekening = None
 ) -> Status.SUCCESS:
     """
+    
     Untuk deposit dan withdrawal, kosongkan "nomor_rekening_tujuan", itu hanya untuk transfer
+
+    datetime_transaksi format:      YYYY-mm-dd HH:mm:ss
+                       penjelasan:  Tahun-bulan-hari Jam:menit:detik
+                       contoh:      2025-11-14 20:10:44
+    
     """
     
     match jenis:
