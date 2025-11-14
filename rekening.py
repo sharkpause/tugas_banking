@@ -3,7 +3,7 @@ from __future__ import annotations
 import random
 
 from database import Database
-from CustomClasses import DataChanges, Status
+from CustomClasses import DataChanges, Status, InsufficientFundsError, ErrorType
 
 from utilitas import nomor_rekening_ke_Rekening
 
@@ -56,6 +56,13 @@ class Rekening:
         return Status.SUCCESS
     
     def kurang_saldo(self, jumlah_uang: int) -> Status.SUCCESS | Status.ERROR:
+        if jumlah_uang > self.__jumlah_saldo:
+            raise InsufficientFundsError({
+                'status': Status.ERROR,
+                'type': ErrorType.INSUFFICIENT_FUNDS,
+                'message': 'Saldo tidak mencukupi'
+            })
+        
         self.__jumlah_saldo -= jumlah_uang
 
         self.commit(DataChanges.JUMLAH_SALDO)

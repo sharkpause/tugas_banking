@@ -6,6 +6,10 @@ class DatabaseError(Exception):
     def __init__(self, errors):
         self.errors = errors
 
+class InsufficientFundsError(Exception):
+    def __init__(self, message="Saldo tidak mencukupi"):
+        super().__init__(message)
+
 class Status:
     ERROR: int = 1
     SUCCESS: int = 0
@@ -13,6 +17,7 @@ class Status:
 class ErrorType:
     VALIDATION: int = 1
     DATABASE: int = 2
+    INSUFFICIENT_FUNDS: int = 3
 
 class ValidationErrorCode:
     EMPTY: int = 1

@@ -43,6 +43,7 @@ class Nasabah:
             raise ValidationError({
                 'status': Status.ERROR,
                 'type': ErrorType.VALIDATION,
+                'message': 'Terjadi error validasi',
                 'errors': validation_errors
             })
 

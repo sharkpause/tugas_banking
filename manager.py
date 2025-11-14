@@ -51,3 +51,4 @@ def buat_nasabah_baru(nama: str, password: str, email: str, nomor_telepon: str, 
 
 n = buat_nasabah_baru('Rachel', 'password', 'beargirl@finfeed.com', '0813332134145', 'Jl. Asia')
 print(n.nama)
+transaksi(JenisTransaksi.WITHDRAW, 20000, '2025-11-04 20:29:10', n.rekening)
