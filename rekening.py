@@ -11,6 +11,13 @@ def generate_nomor_rekening() -> str:
     return ''.join(str(random.randint(0, 9)) for _ in range(20))
 
 class Rekening:
+    """
+    Rekening merepresentasi row data dalam database dalam bentuk object
+    untuk lebih mudah interaksi oleh server developer.
+    
+    Server developer tidak direkomendasikan untuk memodifikasi tabel rekening
+    secara langsung dalam database di luar method-method dalam class ini.
+    """
     def __init__(self, id_nasabah: int, nomor_rekening: str = generate_nomor_rekening(), jumlah_saldo: int = 0):
         self.__nomor_rekening: str = nomor_rekening
         self.__jumlah_saldo: int = jumlah_saldo
