@@ -7,7 +7,6 @@ import bcrypt
 from database import Database
 from rekening import Rekening
 from CustomClasses import ValidationError, DatabaseError, Status, ErrorType, ValidationErrorCode
-from utilitas import nomor_telepon_ke_Rekening
 
 db = Database()
 
@@ -38,24 +37,32 @@ class Nasabah:
     membuat nasabah baru yang langsung disimpan dalam database
 
     """
-    def __init__(self, nama: str, password: str, email: str, nomor_telepon: str, alamat: str):
+    def __init__(self, nama: str, password: str, email: str, nomor_telepon: str, alamat: str, fetch: bool):
         nama: str = nama.strip()
-        password: str = password.strip()
+        
+        if password:
+            password: str = password.strip()
+        else:
+            password: None = None
+        
         email: str = email.strip()
         nomor_telepon: str = nomor_telepon.strip()
         alamat: str = alamat.strip()
 
-        validation_errors = Nasabah.__validate_parameter(nama, password, email, nomor_telepon, alamat)
-        if validation_errors:
-            raise ValidationError({
-                'status': Status.ERROR,
-                'type': ErrorType.VALIDATION,
-                'message': 'Terjadi error validasi',
-                'errors': validation_errors
-            })
+        if not fetch:
+            validation_errors = Nasabah.__validate_parameter(nama, password, email, nomor_telepon, alamat)
+            if validation_errors:
+                raise ValidationError({
+                    'status': Status.ERROR,
+                    'type': ErrorType.VALIDATION,
+                    'message': 'Terjadi error validasi',
+                    'errors': validation_errors
+                })
 
         self.__nama: str = nama
-        self.__password: str = Nasabah.__hash_password(password)
+
+        if not fetch: self.__password: str = Nasabah.__hash_password(password)
+        
         self.__email: str = email
         self.__nomor_telepon: str = nomor_telepon
         self.__alamat: str = alamat
@@ -226,8 +233,25 @@ class Nasabah:
     # def commit():
     #     pass
 
+def nomor_telepon_ke_Nasabah(nomor_telepon: str) -> Nasabah | None:
+    query: str = 'SELECT nama, email, nomor_telepon, alamat FROM nasabah WHERE nomor_telepon=%s'
+    val: tuple = (nomor_telepon,)
 
+    result: list[tuple] = db.fetch(query, val)
+
+    return Nasabah(result[0][0], None, result[0][1], result[0][2], result[0][3], True) if len(result) > 0 else None
+
+def email_ke_Nasabah(email: str) -> Nasabah | None:
+    query: str = 'SELECT nama, email, nomor_telepon, alamat FROM nasabah WHERE email=%s'
+    val: tuple = (email,)
+
+    result: list[tuple] = db.fetch(query, val)
+
+    return Nasabah(result[0][0], None, result[0][1], result[0][2], result[0][3], True) if len(result) > 0 else None
 
 # Testing
 # n = Nasabah('Don', '123', '123@321.com', '081331509015', 'Jl. Asia')
 # print(n.nama)
+
+n = email_ke_Nasabah('shark@finfeed.com')
+print(n.nama)

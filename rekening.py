@@ -5,8 +5,6 @@ import random
 from database import Database
 from CustomClasses import DataChanges, Status, InsufficientFundsError, ErrorType
 
-from utilitas import nomor_rekening_ke_Rekening
-
 db = Database()
 
 def generate_nomor_rekening() -> str:
@@ -121,3 +119,27 @@ class Rekening:
             print(f'Commit failed: {e}')
 
             return Status.ERROR
+
+def nomor_rekening_ke_Rekening(nomor_rekening: str) -> Rekening | None:
+    query: str = 'SELECT id_nasabah, nomor_rekening, jumlah_saldo FROM rekening WHERE nomor_rekening=%s'
+    val: tuple = (nomor_rekening,)
+    
+    result: list[tuple] = db.fetch(query, val)
+
+    return Rekening(result[0][0], result[0][1], result[0][2]) if len(result) > 0 else None
+
+def nomor_telepon_ke_Rekening(nomor_telepon: str) -> Rekening | None:
+    query: str = 'SELECT id, nomor_rekening, jumlah_saldo FROM rekening CROSS JOIN nasabah WHERE nomor_telepon=%s'
+    val: tuple = (nomor_telepon,)
+
+    result: list[tuple] = db.fetch(query, val)
+
+    return Rekening(result[0][0], result[0][1], result[0][2]) if len(result) > 0 else None
+
+def email_ke_Rekening(email: str) -> Rekening | None:
+    query: str = 'SELECT id, nomor_rekening, jumlah_saldo FROM rekening CROSS JOIN nasabah WHERE email=%s'
+    val: tuple = (email,)
+
+    result: list[tuple] = db.fetch(query, val)
+
+    return Rekening(result[0][0], result[0][1], result[0][2]) if len(result) > 0 else None

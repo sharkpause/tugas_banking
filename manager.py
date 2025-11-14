@@ -3,12 +3,11 @@ from __future__ import annotations
 # Script untuk manage class dan operasi database (abstraction) belum selesai
 
 from nasabah import Nasabah
-from rekening import Rekening
+from rekening import Rekening, nomor_rekening_ke_Rekening
 from riwayat_transaksi import RiwayatTransaksi as RT, new_RT
 
 from database import Database
 from CustomClasses import JenisTransaksi, Status, TransactionError
-from utilitas import nomor_rekening_ke_Rekening
 
 db = Database()
 
