@@ -18,6 +18,7 @@ class Rekening:
     Server developer tidak direkomendasikan untuk memodifikasi tabel rekening
     secara langsung dalam database di luar method-method dalam class ini.
     """
+    
     def __init__(self, id_nasabah: int, nomor_rekening: str = generate_nomor_rekening(), jumlah_saldo: int = 0):
         self.__nomor_rekening: str = nomor_rekening
         self.__jumlah_saldo: int = jumlah_saldo
