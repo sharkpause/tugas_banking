@@ -138,10 +138,16 @@ class Nasabah:
 
     def __buat_rekening_baru(self) -> Status:
         if not self.__id:
-            return { 'status': Status.ERROR, 'message': "Can't create a new rekening before a new nasabah in the database" }
+            raise DatabaseError({
+                    'status': Status.ERROR,
+                    'type': ErrorType.DATABASE,
+                    'message': "Can't create a new rekening before a new nasabah in the database"
+                })
         
         self.rekening = Rekening(self.__id)
         self.rekening._Rekening__create_in_database()
+
+        return Status.SUCCESS
 
     def __create_in_database(self) -> int:
         query: str = 'INSERT INTO nasabah (nama, password, email, nomor_telepon, alamat) VALUES (%s, %s, %s, %s, %s)'
