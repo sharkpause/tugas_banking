@@ -1,9 +1,24 @@
-# Rencana untuk sekarang untuk class ini adalah fetch data dari database dan mengubah ke class ini untuk admin viewing di UI
-# jadi untuk sekarang tidak diperlukan
+from __future__ import annotations
 
 class RiwayatTransaksi:
-    # datetime_transaksi format: YYYY-mm-dd HH:mm:ss
-    def __init__(self, nomor_rekening_sumber: str, nomor_rekening_tujuan: str, jenis_transaksi: str, jumlah_uang: int, datetime_transaksi: str): 
+    """
+
+    RiwayatTransaksi merepresentasi row data dalam database dalam bentuk object
+    untuk lebih mudah interaksi oleh server developer.
+    
+    Server developer tidak direkomendasikan untuk memodifikasi tabel riwayat_transaksi
+    secara langsung dalam database di luar method-method dalam class ini.
+
+    nomor_rekening_sumber: string
+    nomor_rekening_tujuan: string
+    jenis_transaksi: Transaksi
+    jumlah_uang: integer
+    datetime_transaksi format:      YYYY-mm-dd HH:mm:ss
+                       penjelasan:  Tahun-bulan-hari Jam:menit:detik
+                       contoh:      2025-11-14 20:10:44
+    
+    """
+    def __init__(self, nomor_rekening_sumber: str, nomor_rekening_tujuan: str, jenis_transaksi: Transaksi, jumlah_uang: int, datetime_transaksi: str): 
         self.__nomor_rekening_sumber = nomor_rekening_sumber
         self.__nomor_rekening_tujuan = nomor_rekening_tujuan
         self.__jenis_transaksi = jenis_transaksi
