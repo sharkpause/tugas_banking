@@ -71,10 +71,10 @@ def buat_nasabah_baru(nama: str, password: str, email: str, nomor_telepon: str, 
 # transaksi(JenisTransaksi.DEPOSIT, 20_000, '2025-11-04 20:29:10', r)
 # print('Saldo rekening baru setelah deposit:', r.saldo)
 
-don = buat_nasabah_baru('Don', 'password', 'shark@finfeed.com', '081231231111', 'Jl. Asia')
-transaksi(JenisTransaksi.DEPOSIT, 30_000, '2025-11-04 20:29:10', don.rekening)
+# don = buat_nasabah_baru('Don', 'password', 'shark@finfeed.com', '081231231111', 'Jl. Asia')
+# transaksi(JenisTransaksi.DEPOSIT, 30_000, '2025-11-04 20:29:10', don.rekening)
 
-rachel = buat_nasabah_baru('Rachel', 'password', 'beargirl@finfeed.com', '0813332134145', 'Jl. Asia')
-transaksi(JenisTransaksi.DEPOSIT, 20_000, '2025-11-04 20:29:10', rachel.rekening)
+# rachel = buat_nasabah_baru('Rachel', 'password', 'beargirl@finfeed.com', '0813332134145', 'Jl. Asia')
+# transaksi(JenisTransaksi.DEPOSIT, 20_000, '2025-11-04 20:29:10', rachel.rekening)
 
-transaksi(JenisTransaksi.TRANSFER, 15_000, '2025-11-04 20:29:10', don.rekening, rachel.rekening)
+# transaksi(JenisTransaksi.TRANSFER, 15_000, '2025-11-04 20:29:10', don.rekening, rachel.rekening)
