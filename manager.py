@@ -18,7 +18,7 @@ def transaksi(
     datetime_transaksi: str,
     Rekening_sumber: Rekening,
     Rekening_tujuan: Rekening = None
-):
+) -> Status.SUCCESS | Status.ERROR:
     """
     Untuk deposit dan withdrawal, kosongkan "nomor_rekening_tujuan", itu hanya untuk transfer
     """
@@ -33,10 +33,12 @@ def transaksi(
 
             return Status.SUCCESS
 
-def buat_nasabah_baru(nama: str, password: str, email: str, nomor_telepon: str, alamat: str):
+def buat_nasabah_baru(nama: str, password: str, email: str, nomor_telepon: str, alamat: str) -> Nasabah:
     n = Nasabah(nama, password, email, nomor_telepon, alamat)
     n._Nasabah__create_in_database()
     n._Nasabah__buat_rekening_baru()
+
+    return n
 
 # # Testing
 # n = Nasabah('Don', '123', '123@123.com', '081231231111', 'aj')
@@ -47,4 +49,5 @@ def buat_nasabah_baru(nama: str, password: str, email: str, nomor_telepon: str, 
 # transaksi(JenisTransaksi.DEPOSIT, 20_000, '2025-11-04 20:29:10', r)
 # print('Saldo rekening baru setelah deposit:', r.saldo)
 
-buat_nasabah_baru('Rachel', 'password', 'beargirl@finfeed.com', '0813332134145', 'Jl. Asia')
+n = buat_nasabah_baru('Rachel', 'password', 'beargirl@finfeed.com', '0813332134145', 'Jl. Asia')
+print(n.nama)
