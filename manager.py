@@ -18,7 +18,7 @@ def transaksi(
     datetime_transaksi: str,
     Rekening_sumber: Rekening,
     Rekening_tujuan: Rekening = None
-) -> Status.SUCCESS:
+) -> Status.SUCCESS | Status.ERROR:
     """
     
     Untuk deposit dan withdrawal, kosongkan "nomor_rekening_tujuan", itu hanya untuk transfer
@@ -53,6 +53,8 @@ def transaksi(
             Rekening_tujuan._Rekening__increase_balance(jumlah_uang)
 
             return Status.SUCCESS
+        case _:
+            return Status.ERROR
 
 def buat_nasabah_baru(nama: str, password: str, email: str, nomor_telepon: str, alamat: str) -> Nasabah:
     n = Nasabah(nama, password, email, nomor_telepon, alamat)
