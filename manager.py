@@ -18,7 +18,7 @@ def transaksi(
     datetime_transaksi: str,
     Rekening_sumber: Rekening,
     Rekening_tujuan: Rekening = None
-) -> Status.SUCCESS | Status.ERROR:
+) -> Status.SUCCESS:
     """
     Untuk deposit dan withdrawal, kosongkan "nomor_rekening_tujuan", itu hanya untuk transfer
     """
