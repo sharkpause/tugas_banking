@@ -36,7 +36,7 @@ def transaksi(
 def buat_nasabah_baru(nama: str, password: str, email: str, nomor_telepon: str, alamat: str) -> Nasabah:
     n = Nasabah(nama, password, email, nomor_telepon, alamat)
     n._Nasabah__create_in_database()
-    n._Nasabah__buat_rekening_baru()
+    n._Nasabah__create_new_rekening()
 
     return n
 

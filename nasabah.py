@@ -139,7 +139,7 @@ class Nasabah:
 
         return errors
 
-    def __buat_rekening_baru(self) -> Status.SUCCESS | Status.ERROR:
+    def __create_new_rekening(self) -> Status.SUCCESS | Status.ERROR:
         if not self.__id:
             raise DatabaseError({
                     'status': Status.ERROR,
