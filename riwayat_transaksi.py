@@ -1,4 +1,10 @@
 from __future__ import annotations
+from datetime import datetime
+
+from CustomClasses import Status
+
+from database import Database
+db = Database()
 
 class RiwayatTransaksi:
     """
@@ -23,7 +29,20 @@ class RiwayatTransaksi:
         self.__nomor_rekening_tujuan = nomor_rekening_tujuan
         self.__jenis_transaksi = jenis_transaksi
         self.__jumlah_uang = jumlah_uang
-        self.__datetime_transaksi = datetime_transaksi
+        self.__datetime_transaksi = datetime.strptime(datetime_transaksi, "%Y-%m-%d %H:%M:%S")
+    
+    def __create_in_database(self) -> Status.SUCCESS | Status.ERROR:
+        query: str = 'INSERT INTO riwayat_transaksi (nomor_rekening_sumber, nomor_rekening_tujuan, jenis_transaksi, jumlah_uang, datetime_transaksi) VALUES (%s, %s, %s, %s, %s)'
+        val: tuple = (
+            self.__nomor_rekening_sumber,
+            self.__nomor_rekening_tujuan,
+            self.__jenis_transaksi,
+            self.__jumlah_uang,
+            self.__datetime_transaksi
+        )
+
+        db.exec_insert_query(query, val)
+        return Status.SUCCESS
     
     @property
     def nomor_rekening_sumber(self) -> str:
