@@ -8,7 +8,10 @@ from CustomClasses import DataChanges
 db = Database()
 
 def generate_nomor_rekening() -> str:
-    return ''.join(str(random.randint(0, 9)) for _ in range(20))
+    while True:
+        n = ''.join(random.choices('0123456789', k=20))
+        if not nomor_rekening_ke_Rekening(n):
+            return n
 
 class Rekening:
     """
@@ -17,8 +20,12 @@ class Rekening:
     
     Server developer tidak direkomendasikan untuk memodifikasi tabel rekening
     secara langsung dalam database di luar method-method dalam class ini.
+
+    id_nasabah: ID nasabah
+    nomor_rekening: Nomor rekening nasabah, jika tidak diisi, akan secara automatis diisikan dengan nomor rekening random baru
+    jumlah_saldo: Jumlah saldo rekening, jika tidak diisi, akan secara automatis diisikan dengan 0 (nol)
     """
-    
+
     def __init__(self, id_nasabah: int, nomor_rekening: str = generate_nomor_rekening(), jumlah_saldo: int = 0):
         self.__nomor_rekening: str = nomor_rekening
         self.__jumlah_saldo: int = jumlah_saldo
