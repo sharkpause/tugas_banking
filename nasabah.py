@@ -188,6 +188,8 @@ class Nasabah:
                     'message': f'Integrity error saat membuat nasabah.\n{e}'
                 })
         except Exception as e:
+            db.rollback()
+            
             raise DatabaseError({
                 'status': Status.ERROR,
                 'type': ErrorType.DATABASE,
