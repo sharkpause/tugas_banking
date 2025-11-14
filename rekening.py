@@ -18,16 +18,16 @@ class Rekening:
         db.exec_query(query, values)
     
     @staticmethod
-    def __generate_nomor_rekening(self):
+    def __generate_nomor_rekening(self) -> str:
         return ''.join(str(random.randint(0, 9)) for _ in range(20))
 
-    def tambah_saldo(self, jumlah_uang: int):
+    def tambah_saldo(self, jumlah_uang: int) -> None:
         self.__jumlah_saldo += jumlah_uang
         self.__changes[DataChanges.JUMLAH_SALDO] = True
 
         self.commit()
     
-    def kurang_saldo(self, jumlah_uang: int):
+    def kurang_saldo(self, jumlah_uang: int) -> None:
         self.__jumlah_saldo -= jumlah_uang
         self.__changes[DataChanges.JUMLAH_SALDO] = True
 
@@ -45,7 +45,7 @@ class Rekening:
     def id_pemilik(self) -> int:
         return self.__id_pemilik
     
-    def commit(self, changes):
+    def commit(self, changes) -> None:
         if changes == DataChanges.JUMLAH_SALDO:
             query = 'UPDATE rekening SET jumlah_saldo = %s WHERE nomor_rekening = %s'
             values = (self.__jumlah_saldo, self.__nomor_rekening)
