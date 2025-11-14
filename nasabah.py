@@ -2,6 +2,8 @@ import mysql.connector
 import re
 import bcrypt
 
+from typing import List, Dict, Tuple
+
 from database import connect_db
 from rekening import Rekening
 from CustomClasses import ValidationError, DatabaseError, Status, ErrorType, ValidationErrorCode
@@ -24,11 +26,11 @@ class Nasabah:
 
     """
     def __init__(self, nama: str, password: str, email: str, nomor_telepon: str, alamat: str):
-        nama = nama.strip()
-        password = password.strip()
-        email = email.strip()
-        nomor_telepon = nomor_telepon.strip()
-        alamat = alamat.strip()
+        nama: str = nama.strip()
+        password: str = password.strip()
+        email: str = email.strip()
+        nomor_telepon: str = nomor_telepon.strip()
+        alamat: str = alamat.strip()
 
         validation_errors = Nasabah.__validate_parameter(nama, password, email, nomor_telepon, alamat)
         if validation_errors:
@@ -38,18 +40,18 @@ class Nasabah:
                 'errors': errors
             })
 
-        self.__nama = nama
-        self.__password = Nasabah.__hash_password(password)
-        self.__email = email
-        self.__nomor_telepon = nomor_telepon
-        self.__alamat = alamat
+        self.__nama: str = nama
+        self.__password: str = Nasabah.__hash_password(password)
+        self.__email: str = email
+        self.__nomor_telepon: str = nomor_telepon
+        self.__alamat: str = alamat
 
-        self.__id = self.__create_in_database()
+        self.__id: int = self.__create_in_database()
 
-        self.rekening = Rekening(self.__id)
+        self.rekening: Rekening = Rekening(self.__id)
     
     @staticmethod
-    def __hash_password(password: str):
+    def __hash_password(password: str) -> str:
         return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     
     @staticmethod
@@ -59,14 +61,14 @@ class Nasabah:
         email: str,
         nomor_telepon: str,
         alamat: str
-    ):
-        errors = []
+    ) -> List[Dict]:
+        errors: List[Dict] = []
 
-        email_duplicate_query = "SELECT * FROM nasabah WHERE email='%s'"
-        email_duplicate_values = (email,)
+        email_duplicate_query: str = "SELECT * FROM nasabah WHERE email='%s'"
+        email_duplicate_values: Tuple = (email,)
 
-        nomor_telepon_duplicate_query = "SELECT * FROM nasabah WHERE nomor_telepon='%s'"
-        nomor_telepon_duplicate_values = (nomor_telepon,)
+        nomor_telepon_duplicate_query: str = "SELECT * FROM nasabah WHERE nomor_telepon='%s'"
+        nomor_telepon_duplicate_values: Tuple = (nomor_telepon,)
 
         if not nama:
             errors.append({
@@ -129,20 +131,20 @@ class Nasabah:
 
         return errors
 
-    def __create_in_database(self):
-        query = 'INSERT INTO nasabah (nama, password, email, nomor_telepon, alamat) VALUES (%s, %s, %s, %s, %s)'
-        values = (self.__nama, self.__password, self.__email, self.__nomor_telepon, self.__alamat)
+    def __create_in_database(self) -> int:
+        query: str = 'INSERT INTO nasabah (nama, password, email, nomor_telepon, alamat) VALUES (%s, %s, %s, %s, %s)'
+        values: Tuple = (self.__nama, self.__password, self.__email, self.__nomor_telepon, self.__alamat)
 
         try:
-            last_row_id = db.exec_insert_query(query, values)
+            last_row_id: int = db.exec_insert_query(query, values)
 
             return last_row_id
         except mysql.connector.IntegrityError as e:
             db.rollback()
-            errno = e.errno
+            errno: int = e.errno
 
             if errno == db.DUPLICATE_ERRNO:
-                field = str(e).split("for key '")[1].split("'")[0]
+                field: str = str(e).split("for key '")[1].split("'")[0]
 
                 raise DatabaseError({
                     'status': Status.ERROR,
@@ -150,7 +152,7 @@ class Nasabah:
                     'message': f'Tidak dapat membuat nasabah "{self.__nama}" dikarenakan "{field}" duplikat'
                 })
             elif errno == db.NOT_NULL_ERRNO:
-                field = str(e).split("Column '")[1].split("'")[0]
+                field: str = str(e).split("Column '")[1].split("'")[0]
 
                 raise DatabaseError({
                     'status': Status.ERROR,
@@ -171,7 +173,7 @@ class Nasabah:
             })
 
 
-    def telepon(self):
+    def telepon(self) -> None:
         print(f'Sedang menghubung {self.__nama} ({self.__nomor_telepon})...')
     
     @property
