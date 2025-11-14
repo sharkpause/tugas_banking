@@ -7,7 +7,7 @@ from rekening import Rekening
 from riwayat_transaksi import RiwayatTransaksi as RT
 
 from database import Database
-from CustomClasses import JenisTransaksi, Status
+from CustomClasses import JenisTransaksi, Status, TransactionError
 from utilitas import nomor_rekening_ke_Rekening
 
 db = Database()
@@ -34,7 +34,7 @@ def transaksi(
             return Status.SUCCESS
         case JenisTransaksi.TRANSFER:
             if not Rekening_tujuan:
-                raise TypeError({
+                raise TransactionError({
                     'status': Status.ERROR,
                     'type': ErrorType.MISSING_ARGUMENT,
                     'message': 'Rekening tujuan tidak bisa kosong'

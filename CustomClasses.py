@@ -7,7 +7,11 @@ class DatabaseError(Exception):
         self.errors = errors
 
 class InsufficientFundsError(Exception):
-    def __init__(self, message="Saldo tidak mencukupi"):
+    def __init__(self, message):
+        super().__init__(message)
+
+class TransactionError(Exception):
+    def __init__(self, message):
         super().__init__(message)
 
 class Status:
