@@ -2,8 +2,6 @@ import mysql.connector
 import re
 import bcrypt
 
-from typing import List, Dict, Tuple
-
 from database import Database
 from rekening import Rekening
 from CustomClasses import ValidationError, DatabaseError, Status, ErrorType, ValidationErrorCode
@@ -24,6 +22,11 @@ class Nasabah:
     
     Server developer tidak direkomendasikan untuk memodifikasi tabel nasabah
     secara langsung dalam database di luar method-method dalam class ini.
+    
+    Server developer tidak direkomendasikan untuk memanggil method create_in_database
+    dikarenakan method itu membuat objek Nasabah ke dalam database yang dapat
+    memicu error yang tidak diekspektasi. Gunakan function buat_nasabah_baru() untuk
+    membuat nasabah baru yang langsung disimpan dalam database
 
     """
     def __init__(self, nama: str, password: str, email: str, nomor_telepon: str, alamat: str):
@@ -63,14 +66,14 @@ class Nasabah:
         email: str,
         nomor_telepon: str,
         alamat: str
-    ) -> List[Dict]:
-        errors: List[Dict] = []
+    ) -> list[dict]:
+        errors: list[dict] = []
 
         email_duplicate_query: str = "SELECT * FROM nasabah WHERE email=%s"
-        email_duplicate_values: Tuple = (email,)
+        email_duplicate_values: tuple = (email,)
 
         nomor_telepon_duplicate_query: str = "SELECT * FROM nasabah WHERE nomor_telepon=%s"
-        nomor_telepon_duplicate_values: Tuple = (nomor_telepon,)
+        nomor_telepon_duplicate_values: tuple = (nomor_telepon,)
 
         if not nama:
             errors.append({
@@ -133,7 +136,7 @@ class Nasabah:
 
         return errors
 
-    def buat_rekening_baru(self) -> Status:
+    def __buat_rekening_baru(self) -> Status:
         if not self.__id:
             return { 'status': Status.ERROR, 'message': "Can't create a new rekening before a new nasabah in the database" }
         
@@ -142,7 +145,7 @@ class Nasabah:
 
     def __create_in_database(self) -> int:
         query: str = 'INSERT INTO nasabah (nama, password, email, nomor_telepon, alamat) VALUES (%s, %s, %s, %s, %s)'
-        values: Tuple = (self.__nama, self.__password, self.__email, self.__nomor_telepon, self.__alamat)
+        values: tuple = (self.__nama, self.__password, self.__email, self.__nomor_telepon, self.__alamat)
 
         try:
             last_row_id: int = db.exec_insert_query(query, values)
