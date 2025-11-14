@@ -10,7 +10,10 @@ from utilitas import nomor_rekening_ke_Rekening
 db = Database()
 
 def generate_nomor_rekening() -> str:
-    return ''.join(random.choices('0123456789', k=20))
+    while True:
+        n: str = ''.join(random.choices('0123456789', k=20))
+        if not nomor_rekening_ke_Rekening(n):
+            return n
 
 class Rekening:
     """
@@ -26,13 +29,17 @@ class Rekening:
     memicu error yang tidak diekspektasi
 
     id_nasabah: ID nasabah
-    nomor_rekening: Nomor rekening nasabah, jika tidak diisi, akan secara automatis diisikan dengan 0 (nol)
+    nomor_rekening: Nomor rekening nasabah, jika tidak diisi, akan secara automatis diisikan dengan None
     jumlah_saldo: Jumlah saldo rekening, jika tidak diisi, akan secara automatis diisikan dengan 0 (nol)
 
     """
 
-    def __init__(self, id_nasabah: int, nomor_rekening: str = 0, jumlah_saldo: int = 0):
-        self.__nomor_rekening: str = nomor_rekening
+    def __init__(self, id_nasabah: int, nomor_rekening: str = None, jumlah_saldo: int = 0):
+        if nomor_rekening:
+            self.__nomor_rekening: str = nomor_rekening
+        else:
+            self.__nomor_rekening: str = generate_nomor_rekening()
+        
         self.__jumlah_saldo: int = jumlah_saldo
         
         self.__id_pemilik: int = id_nasabah
