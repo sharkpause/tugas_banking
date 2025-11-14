@@ -10,10 +10,7 @@ from utilitas import nomor_rekening_ke_Rekening
 db = Database()
 
 def generate_nomor_rekening() -> str:
-    while True:
-        n = ''.join(random.choices('0123456789', k=20))
-        if not nomor_rekening_ke_Rekening(n):
-            return n
+    return ''.join(random.choices('0123456789', k=20))
 
 class Rekening:
     """
@@ -29,12 +26,12 @@ class Rekening:
     memicu error yang tidak diekspektasi
 
     id_nasabah: ID nasabah
-    nomor_rekening: Nomor rekening nasabah, jika tidak diisi, akan secara automatis diisikan dengan nomor rekening random baru
+    nomor_rekening: Nomor rekening nasabah, jika tidak diisi, akan secara automatis diisikan dengan 0 (nol)
     jumlah_saldo: Jumlah saldo rekening, jika tidak diisi, akan secara automatis diisikan dengan 0 (nol)
 
     """
 
-    def __init__(self, id_nasabah: int, nomor_rekening: str = generate_nomor_rekening(), jumlah_saldo: int = 0):
+    def __init__(self, id_nasabah: int, nomor_rekening: str = 0, jumlah_saldo: int = 0):
         self.__nomor_rekening: str = nomor_rekening
         self.__jumlah_saldo: int = jumlah_saldo
         
@@ -42,9 +39,18 @@ class Rekening:
     
     def __create_in_database(self) -> Status.SUCCESS | Status.ERROR:
         query: str = 'INSERT INTO rekening (id_nasabah, nomor_rekening, jumlah_saldo) VALUES (%s, %s, %s)'
-        values: tuple = (self.__id_pemilik, self.__nomor_rekening, self.__jumlah_saldo)
+        
+        while True:
+            self.__nomor_rekening = generate_nomor_rekening()
+            val: tuple = (self.__id_pemilik, self.__nomor_rekening, self.__jumlah_saldo)
 
-        db.exec_query(query, values)
+            try:
+                db.exec_insert_query(query, val)
+                break
+            except mysql.connector.IntegrityError as e:
+                if e.errno == db.DUPLICATE_ERRNO:
+                    continue
+                raise
 
         return Status.SUCCESS
 
