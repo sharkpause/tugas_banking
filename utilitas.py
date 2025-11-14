@@ -19,6 +19,12 @@ def nomor_telepon_ke_Rekening(nomor_telepon: str) -> Rekening:
     result: List[Tuple] = db.fetch(query, val)[0]
     return Rekening(result[0], result[1], result[2])
 
+def email_ke_Rekening(email: str) -> Rekening:
+    query: str = 'SELECT id, nomor_rekening, jumlah_saldo FROM rekening CROSS JOIN nasabah WHERE email=%s'
+    val: Tuple = (email,)
+
+    result: List[Tuple] = db.fetch(query, val)[0]
+    return Rekening(result[0], result[1], result[2])
 
 # Testing
 
