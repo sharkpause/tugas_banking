@@ -1,6 +1,6 @@
-# Script untuk manage class dan operasi database (abstraction) belum selesai
+from __future__ import annotations
 
-from typing import Tuple
+# Script untuk manage class dan operasi database (abstraction) belum selesai
 
 from nasabah import Nasabah
 from rekening import Rekening
