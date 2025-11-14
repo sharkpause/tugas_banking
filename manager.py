@@ -43,6 +43,8 @@ def buat_nasabah_baru(nama: str, password: str, email: str, nomor_telepon: str, 
 # n.rekening.tambah_saldo(1_000)
 # print('Saldo rekening Don:', n.rekening.saldo)
 
-r = nomor_rekening_ke_Rekening('34674875834793492200')
-transaksi(JenisTransaksi.DEPOSIT, 20_000, '2025-11-04 20:29:10', r)
-print('Saldo rekening baru setelah deposit:', r.saldo)
+# r = nomor_rekening_ke_Rekening('34674875834793492200')
+# transaksi(JenisTransaksi.DEPOSIT, 20_000, '2025-11-04 20:29:10', r)
+# print('Saldo rekening baru setelah deposit:', r.saldo)
+
+buat_nasabah_baru('Rachel', 'password', 'beargirl@finfeed.com', '0813332134145', 'Jl. Asia')
