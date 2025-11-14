@@ -21,11 +21,15 @@ def transaksi(
 ) -> Status.SUCCESS | Status.ERROR:
     """
     
-    Untuk deposit dan withdrawal, kosongkan "nomor_rekening_tujuan", itu hanya untuk transfer
+    KOSONGKAN "Rekening_tujuan" dalam DEPOSIT dan WITHDRAW, ITU HANYA UNTUK TRANSFER
 
     datetime_transaksi format:      YYYY-mm-dd HH:mm:ss
                        penjelasan:  Tahun-bulan-hari Jam:menit:detik
                        contoh:      2025-11-14 20:10:44
+    
+    Pembuatan riwayat transaksi sudah ditangani function ini.
+    JANGAN PERNAH CALL FUNCTION increase_balance DAN decrease_balance ATAU
+    MEMBUAT RiwayatTransaki SENDIRI SEMUANYA HARUS LEWAT FUNCTION INI
     
     """
     
@@ -57,6 +61,17 @@ def transaksi(
             return Status.ERROR
 
 def buat_nasabah_baru(nama: str, password: str, email: str, nomor_telepon: str, alamat: str) -> Nasabah:
+    """
+
+    SELALU GUNAKAN FUNCTION INI UNTUK MEMBUAT NASABAH BARU YANG INGIN DISIMPAN DALAM DATABASE
+
+    nama: Nama lengkap nasabah
+    password: Password "plain-text" JANGAN DI-HASH, SUDAH DI-HASH DALAM CONSTRUCTOR NASABAH
+    email: Email nasabah
+    nomor_telepon: Nomor telepon nasabah
+    alamat: Alamat lengkap nasabah
+
+    """
     n = Nasabah(nama, password, email, nomor_telepon, alamat)
     n._Nasabah__create_in_database()
     n._Nasabah__create_new_rekening()

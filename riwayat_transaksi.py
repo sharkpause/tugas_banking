@@ -13,7 +13,12 @@ class RiwayatTransaksi:
     untuk lebih mudah interaksi oleh server developer.
     
     Server developer tidak direkomendasikan untuk memodifikasi tabel riwayat_transaksi
-    secara langsung dalam database di luar method-method dalam class ini.
+    secara langsung dalam database.
+
+    Ini tidak akan pernah perlu digunakan oleh server developer karena hanya
+    di-call dalam fungsi transaksi() manager.py.
+    Jangan membuat riwayat transaksi sendiri, semuanya sudah di-handle
+    dalam manager.py
 
     nomor_rekening_sumber: string
     nomor_rekening_tujuan: string

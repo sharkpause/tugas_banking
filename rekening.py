@@ -26,7 +26,16 @@ class Rekening:
     
     Server developer tidak direkomendasikan untuk memanggil method create_in_database
     dikarenakan method itu membuat objek Rekening ke dalam database yang dapat
-    memicu error yang tidak diekspektasi
+    memicu error yang tidak diekspektasi.
+
+    Jika ingin membuat rekening baru yang untuk di-save ke dalam database, jangan.
+    Itu sudah di-handle function buat_nasabah_baru() dalam manager.py.
+
+    Gunakan function nomor_rekening_ke_Rekening, nomor_telepon_ke_Rekening, email_ke_Rekening
+    untuk mendapatkan object Rekening untuk data di dalam database
+
+    Jangan pernah call method increasing_balance dan decreasing_balance, selalu gunakan
+    function transaksi dalam manager.py agar semua transaksi terekam dalam database
 
     id_nasabah: ID nasabah
     nomor_rekening: Nomor rekening nasabah, jika tidak diisi, akan secara automatis diisikan dengan None
