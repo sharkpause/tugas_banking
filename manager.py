@@ -33,6 +33,11 @@ def transaksi(
 
             return Status.SUCCESS
 
+def buat_nasabah_baru(nama: str, password: str, email: str, nomor_telepon: str, alamat: str):
+    n = Nasabah(nama, password, email, nomor_telepon, alamat)
+    n._Nasabah__create_in_database()
+    n.buat_rekening_baru()
+
 # # Testing
 # n = Nasabah('Don', '123', '123@123.com', '081231231111', 'aj')
 # n.rekening.tambah_saldo(1_000)
