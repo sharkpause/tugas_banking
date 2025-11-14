@@ -1,9 +1,9 @@
 import random
 
-from typing import Tuple
-
 from database import Database
 from CustomClasses import DataChanges
+
+from utilitas import nomor_rekening_ke_Rekening
 
 db = Database()
 
@@ -15,15 +15,21 @@ def generate_nomor_rekening() -> str:
 
 class Rekening:
     """
+
     Rekening merepresentasi row data dalam database dalam bentuk object
     untuk lebih mudah interaksi oleh server developer.
     
     Server developer tidak direkomendasikan untuk memodifikasi tabel rekening
     secara langsung dalam database di luar method-method dalam class ini.
+    
+    Server developer tidak direkomendasikan untuk memanggil method create_in_database
+    dikarenakan method itu membuat objek Rekening ke dalam database yang dapat
+    memicu error yang tidak diekspektasi
 
     id_nasabah: ID nasabah
     nomor_rekening: Nomor rekening nasabah, jika tidak diisi, akan secara automatis diisikan dengan nomor rekening random baru
     jumlah_saldo: Jumlah saldo rekening, jika tidak diisi, akan secara automatis diisikan dengan 0 (nol)
+
     """
 
     def __init__(self, id_nasabah: int, nomor_rekening: str = generate_nomor_rekening(), jumlah_saldo: int = 0):
@@ -34,7 +40,7 @@ class Rekening:
     
     def __create_in_database(self):
         query: str = 'INSERT INTO rekening (id_nasabah, nomor_rekening, jumlah_saldo) VALUES (%s, %s, %s)'
-        values: Tuple = (self.__id_pemilik, self.__nomor_rekening, self.__jumlah_saldo)
+        values: tuple = (self.__id_pemilik, self.__nomor_rekening, self.__jumlah_saldo)
 
         db.exec_query(query, values)
 
@@ -63,6 +69,6 @@ class Rekening:
     def commit(self, changes: DataChanges) -> None:
         if changes == DataChanges.JUMLAH_SALDO:
             query: str = 'UPDATE rekening SET jumlah_saldo = %s WHERE nomor_rekening = %s'
-            values: Tuple = (self.__jumlah_saldo, self.__nomor_rekening)
+            values: tuple = (self.__jumlah_saldo, self.__nomor_rekening)
 
             db.exec_query(query, values)
