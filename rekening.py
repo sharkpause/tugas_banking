@@ -62,6 +62,7 @@ class Rekening:
         return Status.SUCCESS
 
     def __increase_balance(self, jumlah_uang: int) -> Status.SUCCESS | Status.ERROR:
+        self.__previous_saldo = self.__jumlah_saldo
         self.__jumlah_saldo += jumlah_uang
 
         self.commit(DataChanges.JUMLAH_SALDO)
@@ -76,6 +77,7 @@ class Rekening:
                 'message': 'Saldo tidak mencukupi'
             })
         
+        self.__previous_saldo = self.__jumlah_saldo
         self.__jumlah_saldo -= jumlah_uang
 
         self.commit(DataChanges.JUMLAH_SALDO)
@@ -95,10 +97,18 @@ class Rekening:
         return self.__id_pemilik
     
     def commit(self, changes: DataChanges) -> Status.SUCCESS | Status.ERROR:
-        if changes == DataChanges.JUMLAH_SALDO:
-            query: str = 'UPDATE rekening SET jumlah_saldo = %s WHERE nomor_rekening = %s'
-            values: tuple = (self.__jumlah_saldo, self.__nomor_rekening)
+        try:
+            if changes == DataChanges.JUMLAH_SALDO:
+                query: str = 'UPDATE rekening SET jumlah_saldo = %s WHERE nomor_rekening = %s'
+                values: tuple = (self.__jumlah_saldo, self.__nomor_rekening)
 
-            db.exec_query(query, values)
-        
-        return Status.SUCCESS
+                db.exec_query(query, values)
+
+            return Status.SUCCESS
+
+        except Exception as e:
+            db.rollback()
+            self.__jumlah_saldo = self.__previous_saldo
+            print(f'Commit failed: {e}')
+
+            return Status.ERROR
