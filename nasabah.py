@@ -4,7 +4,7 @@ import bcrypt
 
 from database import connect_db
 from rekening import Rekening
-from CustomError import ValidationError, DatabaseError, Status, ErrorType, ValidationErrorCode
+from CustomClasses import ValidationError, DatabaseError, Status, ErrorType, ValidationErrorCode
 
 db = connect_db()
 

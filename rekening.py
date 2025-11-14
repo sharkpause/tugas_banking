@@ -1,18 +1,13 @@
 import random
 
 from database import connect_db
+from CustomClasses import DataChanges
+
 db = connect_db()
 
 class Rekening:
-    def generate_nomor_rekening(self):
-        return ''.join(str(random.randint(0, 9)) for _ in range(20))
-
     def __init__(self, id_nasabah: int):
-        self.__changes = { # Logic tracking changes palingan diubah menjadi passing parameter tetapi untuk sekarang menggunakan dict
-            'jumlah_saldo': False
-        }
-
-        self.__nomor_rekening = self.generate_nomor_rekening()
+        self.__nomor_rekening = Rekening.__generate_nomor_rekening()
         self.__jumlah_saldo = 0
         
         self.__id_pemilik = id_nasabah
@@ -22,15 +17,19 @@ class Rekening:
 
         db.exec_query(query, values)
     
+    @staticmethod
+    def __generate_nomor_rekening(self):
+        return ''.join(str(random.randint(0, 9)) for _ in range(20))
+
     def tambah_saldo(self, jumlah_uang: int):
         self.__jumlah_saldo += jumlah_uang
-        self.__changes['jumlah_saldo'] = True
+        self.__changes[DataChanges.JUMLAH_SALDO] = True
 
         self.commit()
     
     def kurang_saldo(self, jumlah_uang: int):
         self.__jumlah_saldo -= jumlah_uang
-        self.__changes['jumlah_saldo'] = True
+        self.__changes[DataChanges.JUMLAH_SALDO] = True
 
         self.commit()
     
@@ -46,8 +45,8 @@ class Rekening:
     def id_pemilik(self) -> int:
         return self.__id_pemilik
     
-    def commit(self):
-        if self.__changes['jumlah_saldo']:
+    def commit(self, changes):
+        if changes == DataChanges.JUMLAH_SALDO:
             query = 'UPDATE rekening SET jumlah_saldo = %s WHERE nomor_rekening = %s'
             values = (self.__jumlah_saldo, self.__nomor_rekening)
 
