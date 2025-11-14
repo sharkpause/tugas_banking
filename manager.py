@@ -21,15 +21,18 @@ def transaksi(
 ) -> Status.SUCCESS | Status.ERROR:
     """
     
-    KOSONGKAN "Rekening_tujuan" dalam DEPOSIT dan WITHDRAW, ITU HANYA UNTUK TRANSFER
-
-    datetime_transaksi format:      YYYY-mm-dd HH:mm:ss
-                       penjelasan:  Tahun-bulan-hari Jam:menit:detik
-                       contoh:      2025-11-14 20:10:44
-    
     Pembuatan riwayat transaksi sudah ditangani function ini.
     JANGAN PERNAH CALL FUNCTION increase_balance DAN decrease_balance ATAU
     MEMBUAT RiwayatTransaki SENDIRI SEMUANYA HARUS LEWAT FUNCTION INI
+
+    jenis: JenisTransaksi.DEPOSIT atau JenisTransaksi.WITHDRAW atau JenisTransaksi.TRANSFER (terdapat dalam CustomClasses.py)
+    jumlah_uang: integer
+    datetime_transaksi format:      YYYY-mm-dd HH:mm:ss
+                       penjelasan:  Tahun-bulan-hari Jam:menit:detik
+                       contoh:      2025-11-14 20:10:44
+    Rekening_sumber: Objek Rekening
+    Rekening_tujuan: Objek Rekening
+    KOSONGKAN "Rekening_tujuan" dalam DEPOSIT dan WITHDRAW, ITU HANYA UNTUK TRANSFER
     
     """
     

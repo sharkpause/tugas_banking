@@ -28,6 +28,9 @@ class Nasabah:
     Server developer tidak direkomendasikan untuk memanggil method create_in_database
     dikarenakan method itu membuat objek Nasabah ke dalam database yang dapat
     memicu error yang tidak diekspektasi.
+
+    Hanya membuat instance langsung jika ingin membuat objek nasabah yang tidak langsung
+    disimpan dalam database, tetapi seharusnya tidak pernah perlu.
     
     Jangan membuat nasabah baru yang ingin disimpan ke database dengan:
     nasabah_baru = Nasabah(...)
