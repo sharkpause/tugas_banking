@@ -4,17 +4,13 @@ from __future__ import annotations
 
 from nasabah import Nasabah
 from rekening import Rekening
-from riwayat_transaksi import RiwayatTransaksi as RT
+from riwayat_transaksi import RiwayatTransaksi as RT, new_RT
 
 from database import Database
 from CustomClasses import JenisTransaksi, Status, TransactionError
 from utilitas import nomor_rekening_ke_Rekening
 
 db = Database()
-
-def new_RT(nomor_rekening_sumber: str, nomor_rekening_tujuan: str, jenis: JenisTransaksi, jumlah_uang: int, datetime_transaksi: str) -> RT:
-    rt = RT(nomor_rekening_sumber, nomor_rekening_tujuan, JenisTransaksi.DEPOSIT, jumlah_uang, datetime_transaksi)
-    rt._RiwayatTransaksi__create_in_database()
 
 def transaksi(
     jenis: JenisTransaksi,

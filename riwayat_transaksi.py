@@ -69,3 +69,7 @@ class RiwayatTransaksi:
     
     # def commit():
     #     pass
+
+def new_RT(nomor_rekening_sumber: str, nomor_rekening_tujuan: str, jenis: JenisTransaksi, jumlah_uang: int, datetime_transaksi: str) -> RT:
+    rt = RT(nomor_rekening_sumber, nomor_rekening_tujuan, JenisTransaksi.DEPOSIT, jumlah_uang, datetime_transaksi)
+    rt._RiwayatTransaksi__create_in_database()
