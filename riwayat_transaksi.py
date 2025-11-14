@@ -24,7 +24,7 @@ class RiwayatTransaksi:
                        contoh:      2025-11-14 20:10:44
     
     """
-    def __init__(self, nomor_rekening_sumber: str, nomor_rekening_tujuan: str, jenis_transaksi: Transaksi, jumlah_uang: int, datetime_transaksi: str): 
+    def __init__(self, nomor_rekening_sumber: str, nomor_rekening_tujuan: str, jenis_transaksi: JenisTransaksi, jumlah_uang: int, datetime_transaksi: str): 
         self.__nomor_rekening_sumber = nomor_rekening_sumber
         self.__nomor_rekening_tujuan = nomor_rekening_tujuan
         self.__jenis_transaksi = jenis_transaksi
