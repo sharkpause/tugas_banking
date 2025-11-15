@@ -4,12 +4,15 @@ import random
 
 from database import db
 from CustomClasses import DataChanges, Status, InsufficientFundsError, ErrorType
-from helper import nomor_rekening_ke_Rekening
 
 def generate_nomor_rekening() -> str:
     while True:
         n: str = ''.join(random.choices('0123456789', k=20))
-        if not nomor_rekening_ke_Rekening(n):
+        query: str = 'SELECT id_nasabah, nomor_rekening, jumlah_saldo FROM rekening WHERE nomor_rekening=%s'
+        val: tuple = (n,)
+        
+        result: list[tuple] = db.fetch(query, val)
+        if len(result) == 0:
             return n
 
 class Rekening:

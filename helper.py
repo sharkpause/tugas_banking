@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from database import db
+from nasabah import Nasabah
 
 def nomor_telepon_ke_Nasabah(nomor_telepon: str) -> Nasabah | None:
     query: str = 'SELECT nama, email, nomor_telepon, alamat FROM nasabah WHERE nomor_telepon=%s'

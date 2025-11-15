@@ -125,3 +125,21 @@ def buat_nasabah_baru(nama: str, password: str, email: str, nomor_telepon: str, 
     except:
         db.rollback()
         raise
+
+def hapus_nasabah(nomor_telepon: str = None, email: str = None):
+    try:
+        if nomor_telepon:
+            query: str = 'DELETE FROM nasabah WHERE nomor_telepon = %s'
+            val: tuple = (nomor_telepon,)
+
+            db.exec_query(query, val)
+            db.commit()
+        elif email:
+            query: str = 'DELETE FROM nasabah WHERE email = %s'
+            val: tuple = (email,)
+
+            db.exec_query(query, val)
+            db.commit()
+    except:
+        db.rollback()
+        raise

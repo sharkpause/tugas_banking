@@ -8,8 +8,6 @@ from database import db
 from rekening import Rekening
 from CustomClasses import ValidationError, DatabaseError, Status, ErrorType, ValidationErrorCode
 
-from helper import nomor_telepon_ke_Rekening
-
 EMAIL_REGEX = r'^[\w\.-]+@[\w\.-]+\.\w+$'
 PHONE_REGEX = r'^08\d{8,11}$'
 
@@ -68,7 +66,11 @@ class Nasabah:
         self.__alamat: str = alamat
 
         try:
-            self.rekening: Rekening = nomor_telepon_ke_Rekening(nomor_telepon_ke_Rekening)
+            query: str = 'SELECT id_nasabah, nomor_rekening, jumlah_saldo FROM rekening WHERE nomor_rekening=%s'
+            val: tuple = (nomor_rekening,)
+            
+            result: list[tuple] = db.fetch(query, val)
+            self.rekening: Rekening = Rekening(result[0][0], result[0][1], result[0][2])
         except:
             self.rekening: Rekening = None
 
