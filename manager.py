@@ -11,7 +11,7 @@ def deposit(
     jumlah_uang: int,
     datetime_transaksi: str,
     Rekening
-) -> Status.SUCECSS | Status.ERROR:
+) -> Status.SUCCESS | Status.ERROR:
     """
     
     Pembuatan riwayat transaksi sudah ditangani function ini.
