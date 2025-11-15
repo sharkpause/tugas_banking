@@ -4,11 +4,9 @@ import mysql.connector
 import re
 import bcrypt
 
-from database import Database
+from database import db
 from rekening import Rekening
 from CustomClasses import ValidationError, DatabaseError, Status, ErrorType, ValidationErrorCode
-
-db = Database()
 
 EMAIL_REGEX = r'^[\w\.-]+@[\w\.-]+\.\w+$'
 PHONE_REGEX = r'^08\d{8,11}$'
@@ -37,7 +35,7 @@ class Nasabah:
     membuat nasabah baru yang langsung disimpan dalam database
 
     """
-    def __init__(self, nama: str, password: str, email: str, nomor_telepon: str, alamat: str, fetch: bool):
+    def __init__(self, nama: str, password: str, email: str, nomor_telepon: str, alamat: str, fetch: bool = False):
         nama: str = nama.strip()
         
         if password:
@@ -232,22 +230,6 @@ class Nasabah:
     
     # def commit():
     #     pass
-
-def nomor_telepon_ke_Nasabah(nomor_telepon: str) -> Nasabah | None:
-    query: str = 'SELECT nama, email, nomor_telepon, alamat FROM nasabah WHERE nomor_telepon=%s'
-    val: tuple = (nomor_telepon,)
-
-    result: list[tuple] = db.fetch(query, val)
-
-    return Nasabah(result[0][0], None, result[0][1], result[0][2], result[0][3], True) if len(result) > 0 else None
-
-def email_ke_Nasabah(email: str) -> Nasabah | None:
-    query: str = 'SELECT nama, email, nomor_telepon, alamat FROM nasabah WHERE email=%s'
-    val: tuple = (email,)
-
-    result: list[tuple] = db.fetch(query, val)
-
-    return Nasabah(result[0][0], None, result[0][1], result[0][2], result[0][3], True) if len(result) > 0 else None
 
 # Testing
 # n = Nasabah('Don', '123', '123@321.com', '081331509015', 'Jl. Asia')

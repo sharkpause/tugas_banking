@@ -1,10 +1,9 @@
 from __future__ import annotations
 from datetime import datetime
 
-from CustomClasses import Status
+from CustomClasses import Status, JenisTransaksi
 
-from database import Database
-db = Database()
+from database import db
 
 class RiwayatTransaksi:
     """
@@ -37,17 +36,25 @@ class RiwayatTransaksi:
         self.__datetime_transaksi = datetime.strptime(datetime_transaksi, "%Y-%m-%d %H:%M:%S")
     
     def __create_in_database(self) -> Status.SUCCESS | Status.ERROR:
-        query: str = 'INSERT INTO riwayat_transaksi (nomor_rekening_sumber, nomor_rekening_tujuan, jenis_transaksi, jumlah_uang, datetime_transaksi) VALUES (%s, %s, %s, %s, %s)'
-        val: tuple = (
-            self.__nomor_rekening_sumber,
-            self.__nomor_rekening_tujuan,
-            self.__jenis_transaksi,
-            self.__jumlah_uang,
-            self.__datetime_transaksi
-        )
+        try:
+            query: str = 'INSERT INTO riwayat_transaksi (nomor_rekening_sumber, nomor_rekening_tujuan, jenis_transaksi, jumlah_uang, datetime_transaksi) VALUES (%s, %s, %s, %s, %s)'
+            val: tuple = (
+                self.__nomor_rekening_sumber,
+                self.__nomor_rekening_tujuan,
+                self.__jenis_transaksi,
+                self.__jumlah_uang,
+                self.__datetime_transaksi
+            )
 
-        db.exec_insert_query(query, val)
-        return Status.SUCCESS
+            db.exec_insert_query(query, val)
+            return Status.SUCCESS
+        except Exception as e:
+            db.rollback()
+            raise DatabaseError({
+                'status': Status.ERROR,
+                'type': ErrorType.DATABASE,
+                'message': f'Tidak dapat membuat riwayat transaksi'
+            })
     
     @property
     def nomor_rekening_sumber(self) -> str:
@@ -75,6 +82,14 @@ class RiwayatTransaksi:
     # def commit():
     #     pass
 
+jenis_transaksi_mapper = {
+    JenisTransaksi.DEPOSIT: 'deposit',
+    JenisTransaksi.WITHDRAW: 'withdraw',
+    JenisTransaksi.TRANSFER: 'transfer'
+}
+
 def new_RT(nomor_rekening_sumber: str, nomor_rekening_tujuan: str, jenis: JenisTransaksi, jumlah_uang: int, datetime_transaksi: str) -> RT:
-    rt = RT(nomor_rekening_sumber, nomor_rekening_tujuan, JenisTransaksi.DEPOSIT, jumlah_uang, datetime_transaksi)
+    jenis = jenis_transaksi_mapper[jenis]
+
+    rt = RiwayatTransaksi(nomor_rekening_sumber, nomor_rekening_tujuan, jenis, jumlah_uang, datetime_transaksi)
     rt._RiwayatTransaksi__create_in_database()

@@ -2,10 +2,8 @@ from __future__ import annotations
 
 import random
 
-from database import Database
+from database import db
 from CustomClasses import DataChanges, Status, InsufficientFundsError, ErrorType
-
-db = Database()
 
 def generate_nomor_rekening() -> str:
     while True:
@@ -72,7 +70,7 @@ class Rekening:
         self.__previous_saldo = self.__jumlah_saldo
         self.__jumlah_saldo += jumlah_uang
 
-        self.commit(DataChanges.JUMLAH_SALDO)
+        self.__save_to_database(DataChanges.JUMLAH_SALDO)
 
         return Status.SUCCESS
     
@@ -87,7 +85,7 @@ class Rekening:
         self.__previous_saldo = self.__jumlah_saldo
         self.__jumlah_saldo -= jumlah_uang
 
-        self.commit(DataChanges.JUMLAH_SALDO)
+        self.__save_to_database(DataChanges.JUMLAH_SALDO)
 
         return Status.SUCCESS
     
@@ -103,7 +101,7 @@ class Rekening:
     def id_pemilik(self) -> int:
         return self.__id_pemilik
     
-    def commit(self, changes: DataChanges) -> Status.SUCCESS | Status.ERROR:
+    def __save_to_database(self, changes: DataChanges) -> Status.SUCCESS | Status.ERROR:
         try:
             if changes == DataChanges.JUMLAH_SALDO:
                 query: str = 'UPDATE rekening SET jumlah_saldo = %s WHERE nomor_rekening = %s'
@@ -116,30 +114,6 @@ class Rekening:
         except Exception as e:
             db.rollback()
             self.__jumlah_saldo = self.__previous_saldo
-            print(f'Commit failed: {e}')
+            raise DatabaseError(f'Commit failed: {e}')
 
             return Status.ERROR
-
-def nomor_rekening_ke_Rekening(nomor_rekening: str) -> Rekening | None:
-    query: str = 'SELECT id_nasabah, nomor_rekening, jumlah_saldo FROM rekening WHERE nomor_rekening=%s'
-    val: tuple = (nomor_rekening,)
-    
-    result: list[tuple] = db.fetch(query, val)
-
-    return Rekening(result[0][0], result[0][1], result[0][2]) if len(result) > 0 else None
-
-def nomor_telepon_ke_Rekening(nomor_telepon: str) -> Rekening | None:
-    query: str = 'SELECT id, nomor_rekening, jumlah_saldo FROM rekening CROSS JOIN nasabah WHERE nomor_telepon=%s'
-    val: tuple = (nomor_telepon,)
-
-    result: list[tuple] = db.fetch(query, val)
-
-    return Rekening(result[0][0], result[0][1], result[0][2]) if len(result) > 0 else None
-
-def email_ke_Rekening(email: str) -> Rekening | None:
-    query: str = 'SELECT id, nomor_rekening, jumlah_saldo FROM rekening CROSS JOIN nasabah WHERE email=%s'
-    val: tuple = (email,)
-
-    result: list[tuple] = db.fetch(query, val)
-
-    return Rekening(result[0][0], result[0][1], result[0][2]) if len(result) > 0 else None

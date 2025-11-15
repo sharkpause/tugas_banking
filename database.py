@@ -20,19 +20,22 @@ class Database:
             self.cursor.execute(query)
         else:
             self.cursor.execute(query, val)
-        self.db.commit()
     
     def exec_insert_query(self, query: str, val: Tuple = None) -> int:
         if val is None:
             self.cursor.execute(query)
         else:
             self.cursor.execute(query, val)
-        self.db.commit()
         return self.cursor.lastrowid
     
     def fetch(self, query: str, val: Tuple = None) -> List:
         self.cursor.execute(query, val)
         return self.cursor.fetchall()
     
+    def commit(self):
+        self.db.commit()
+
     def rollback(self):
         self.db.rollback()
+
+db = Database()
