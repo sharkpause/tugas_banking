@@ -8,6 +8,8 @@ from database import db
 from rekening import Rekening
 from CustomClasses import ValidationError, DatabaseError, Status, ErrorType, ValidationErrorCode
 
+from helper import nomor_telepon_ke_Rekening
+
 EMAIL_REGEX = r'^[\w\.-]+@[\w\.-]+\.\w+$'
 PHONE_REGEX = r'^08\d{8,11}$'
 
@@ -227,13 +229,3 @@ class Nasabah:
     @property
     def alamat(self) -> str:
         return self.__alamat
-    
-    # def commit():
-    #     pass
-
-# Testing
-# n = Nasabah('Don', '123', '123@321.com', '081331509015', 'Jl. Asia')
-# print(n.nama)
-
-# n = email_ke_Nasabah('shark@finfeed.com')
-# print(n.nama)
