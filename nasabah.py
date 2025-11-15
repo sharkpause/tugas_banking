@@ -253,5 +253,5 @@ def email_ke_Nasabah(email: str) -> Nasabah | None:
 # n = Nasabah('Don', '123', '123@321.com', '081331509015', 'Jl. Asia')
 # print(n.nama)
 
-n = email_ke_Nasabah('shark@finfeed.com')
-print(n.nama)
+# n = email_ke_Nasabah('shark@finfeed.com')
+# print(n.nama)
