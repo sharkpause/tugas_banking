@@ -126,16 +126,16 @@ def buat_nasabah_baru(nama: str, password: str, email: str, nomor_telepon: str, 
         db.rollback()
         raise
 
-def hapus_nasabah(nomor_telepon: str = None, email: str = None):
+def tutup_nasabah(nomor_telepon: str = None, email: str = None):
     try:
         if nomor_telepon:
-            query: str = 'DELETE FROM nasabah WHERE nomor_telepon = %s'
+            query: str = 'UPDATE nasabah SET status_buka = false WHERE nomor_telepon = %s'
             val: tuple = (nomor_telepon,)
 
             db.exec_query(query, val)
             db.commit()
         elif email:
-            query: str = 'DELETE FROM nasabah WHERE email = %s'
+            query: str = 'UPDATE nasabah SET status_buka = false WHERE email = %s'
             val: tuple = (email,)
 
             db.exec_query(query, val)
