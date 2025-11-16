@@ -11,7 +11,7 @@ def deposit(
     jumlah_uang: int,
     datetime_transaksi: str,
     Rekening
-) -> Status.SUCCESS | Status.ERROR:
+) -> int:
     """
     
     Pembuatan riwayat transaksi sudah ditangani function ini.
@@ -28,11 +28,11 @@ def deposit(
 
     try:
         balance_status = Rekening._Rekening__increase_balance(jumlah_uang)
-        new_RT(Rekening.nomor_rekening, None, JenisTransaksi.DEPOSIT, jumlah_uang, datetime_transaksi)
+        id = new_RT(Rekening.nomor_rekening, None, JenisTransaksi.DEPOSIT, jumlah_uang, datetime_transaksi)
         
         db.commit()
 
-        return Status.SUCCESS
+        return id
     except:
         db.rollback()
         raise
@@ -54,15 +54,17 @@ def withdraw(
                        contoh:      2025-11-14 20:10:44
     Rekening: Objek Rekening
 
+    Return RiwayatTransaksi ID
+
     """
 
     try:
         Rekening._Rekening__decrease_balance(jumlah_uang)
-        new_RT(Rekening.nomor_rekening, None, JenisTransaksi.DEPOSIT, jumlah_uang, datetime_transaksi)
+        id = new_RT(Rekening.nomor_rekening, None, JenisTransaksi.WITHDRAW, jumlah_uang, datetime_transaksi)
         
         db.commit()
         
-        return Status.SUCCESS
+        return id
     except:
         db.rollback()
         raise
@@ -72,7 +74,7 @@ def transfer(
     datetime_transaksi: str,
     Rekening_sumber: Rekening,
     Rekening_tujuan: Rekening
-) -> Status.SUCCESS | Status.ERROR:
+) -> int:
     """
     
     Pembuatan riwayat transaksi sudah ditangani function ini.
@@ -85,6 +87,8 @@ def transfer(
                        contoh:      2025-11-14 20:10:44
     Rekening_sumber: Objek Rekening
     Rekening_tujuan: Objek Rekening
+
+    Return RiwayatTransaksi ID
     
     """
 
@@ -92,11 +96,11 @@ def transfer(
         Rekening_sumber._Rekening__decrease_balance(jumlah_uang)
         Rekening_tujuan._Rekening__increase_balance(jumlah_uang)
 
-        new_RT(Rekening_sumber.nomor_rekening, Rekening_tujuan.nomor_rekening, JenisTransaksi.TRANSFER, jumlah_uang, datetime_transaksi)
+        id = new_RT(Rekening_sumber.nomor_rekening, Rekening_tujuan.nomor_rekening, JenisTransaksi.TRANSFER, jumlah_uang, datetime_transaksi)
 
         db.commit()
 
-        return Status.SUCCESS
+        return id
     except:
         db.rollback()
         raise

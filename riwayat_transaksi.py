@@ -35,7 +35,7 @@ class RiwayatTransaksi:
         self.__jumlah_uang = jumlah_uang
         self.__datetime_transaksi = datetime.strptime(datetime_transaksi, "%Y-%m-%d %H:%M:%S")
     
-    def __create_in_database(self) -> Status.SUCCESS | Status.ERROR:
+    def __create_in_database(self) -> int:
         try:
             query: str = 'INSERT INTO riwayat_transaksi (nomor_rekening_sumber, nomor_rekening_tujuan, jenis_transaksi, jumlah_uang, datetime_transaksi) VALUES (%s, %s, %s, %s, %s)'
             val: tuple = (
@@ -46,8 +46,8 @@ class RiwayatTransaksi:
                 self.__datetime_transaksi
             )
 
-            db.exec_insert_query(query, val)
-            return Status.SUCCESS
+            row_id = db.exec_insert_query(query, val)
+            return row_id
         except Exception as e:
             db.rollback()
             raise DatabaseError({
@@ -92,4 +92,4 @@ def new_RT(nomor_rekening_sumber: str, nomor_rekening_tujuan: str, jenis: JenisT
     jenis = jenis_transaksi_mapper[jenis]
 
     rt = RiwayatTransaksi(nomor_rekening_sumber, nomor_rekening_tujuan, jenis, jumlah_uang, datetime_transaksi)
-    rt._RiwayatTransaksi__create_in_database()
+    return rt._RiwayatTransaksi__create_in_database()
