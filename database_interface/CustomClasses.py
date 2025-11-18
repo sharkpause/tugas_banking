@@ -14,6 +14,10 @@ class TransactionError(Exception):
     def __init__(self, message):
         super().__init__(message)
 
+class CredentialsError(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
 class Status:
     ERROR: int = 1
     SUCCESS: int = 0
@@ -23,6 +27,7 @@ class ErrorType:
     DATABASE: int = 2
     INSUFFICIENT_FUNDS: int = 3
     MISSING_ARGUMENT: int = 4
+    CREDENTIALS: int = 5
 
 class ValidationErrorCode:
     EMPTY: int = 1

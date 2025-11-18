@@ -1,9 +1,9 @@
 from __future__ import annotations
 from datetime import datetime
 
-from CustomClasses import Status, JenisTransaksi
+from .CustomClasses import Status, JenisTransaksi
 
-from database import db
+from .database import db
 
 class RiwayatTransaksi:
     """

@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-from nasabah import Nasabah
-from rekening import Rekening
-from riwayat_transaksi import RiwayatTransaksi as RT, new_RT
+from .nasabah import Nasabah
+from .rekening import Rekening
+from .riwayat_transaksi import RiwayatTransaksi as RT, new_RT
 
-from database import db
-from CustomClasses import JenisTransaksi, Status, TransactionError, DatabaseError
+from .database import db
+from .CustomClasses import JenisTransaksi, Status, TransactionError, DatabaseError
+
+from .helper import nomor_telepon_ke_Nasabah
 
 def deposit(
     jumlah_uang: int,
@@ -147,3 +149,21 @@ def tutup_nasabah(nomor_telepon: str = None, email: str = None):
     except:
         db.rollback()
         raise
+
+def login_nasabah(nomor_telepon: str, password: str):
+    '''
+
+    Function ini melogin nasabah menggunakan database operasi
+    Jangan meng-call function login dalam objek Nasabah secara langsung
+
+    '''
+    try:
+        nasabah = nomor_telepon_ke_Nasabah(nomor_telepon)
+        result = nasabah._Nasabah__login(password)
+        
+        result['object'] = nasabah
+        return result
+    except:
+        raise
+
+login_nasabah('081331509003', 'password')

@@ -4,9 +4,9 @@ import mysql.connector
 import re
 import bcrypt
 
-from database import db
-from rekening import Rekening
-from CustomClasses import ValidationError, DatabaseError, Status, ErrorType, ValidationErrorCode
+from .database import db
+from .rekening import Rekening
+from .CustomClasses import ValidationError, DatabaseError, Status, ErrorType, ValidationErrorCode, CredentialsError
 
 EMAIL_REGEX = r'^[\w\.-]+@[\w\.-]+\.\w+$'
 PHONE_REGEX = r'^08\d{8,11}$'
@@ -154,6 +154,32 @@ class Nasabah:
             })
 
         return errors
+    
+    def __get_password_from_database(self):
+        query: str = 'SELECT password FROM nasabah WHERE nomor_telepon=%s'
+        values: tuple = (self.__nomor_telepon,)
+
+        hash = db.fetch(query, values)[0][0]
+
+        if isinstance(hash, str):
+            hash = hash.encode('utf-8')
+        return hash
+
+    def __login(self, password: str):
+        password = password.encode('utf-8')
+        
+        try:
+            if bcrypt.checkpw(password, self.__get_password_from_database()):
+                return {
+                    'status': Status.SUCCESS,
+                    'message': 'User telah login secara sukses',
+                }
+        except:
+            raise CredentialsError({
+                'status': Status.ERROR,
+                'type': ErrorType.CREDENTIALS,
+                'message': 'User antara salah nomor telepon atau salah password'
+            })
 
     def __create_new_rekening(self) -> Status.SUCCESS | Status.ERROR:
         if not self.__id:

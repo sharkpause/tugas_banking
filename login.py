@@ -1,31 +1,28 @@
 import tkinter as tk
 from tkinter import messagebox
 import hashlib
-from db_config import get_db_connection
+
+from database_interface.database import db
+from database_interface.manager import login_nasabah
 
 def login_user():
     email = entry_email.get()
     password = entry_password.get()
 
     if not email or not password:
-        messagebox.showwarning("Peringatan", "Email dan password wajib diisi!")
+        messagebox.showwarning("Peringatan", "Nomor telepon dan password wajib diisi!")
         return
 
-    password_hash = hashlib.sha256(password.encode()).hexdigest()
+    try:
+        # Assuming nomor_telepon is equivalent to email here, adjust if needed
+        result = login_nasabah(email, password)
+        user = result['object']
 
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-
-    cursor.execute("SELECT * FROM nasabah WHERE email=%s AND password_hash=%s", (email, password_hash))
-    user = cursor.fetchone()
-
-    cursor.close()
-    conn.close()
-
-    if user:
-        messagebox.showinfo("Sukses", f"Selamat datang, {user['nama']}!")
+        messagebox.showinfo("Sukses", f"Selamat datang, {user.nama}!")
         open_dashboard(user)
-    else:
+    except Exception as e:
+        print('Error:', e)
+        # You can customize the error message if login_nasabah raises a specific exception
         messagebox.showerror("Gagal", "Email atau password salah!")
 
 def open_dashboard(user):
@@ -34,7 +31,7 @@ def open_dashboard(user):
     dashboard.geometry("400x300")
 
     # Ambil data rekening nasabah
-    conn = get_db_connection()
+    conn = db
     cursor = conn.cursor(dictionary=True)
     cursor.execute("SELECT no_rekening, saldo FROM rekening WHERE id_nasabah = %s", (user['id'],))
     rekening = cursor.fetchone()
