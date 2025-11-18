@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import mysql.connector as mysql_conn
 
 class Database:
