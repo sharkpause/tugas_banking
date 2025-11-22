@@ -1,9 +1,8 @@
 import tkinter as tk
 from tkinter import messagebox
-import mysql.connector
 import hashlib
 import random
-from db_config import get_db_connection
+from database_interface.database import db
 
 def generate_no_rekening():
     # contoh: 10 digit angka acak
@@ -23,7 +22,7 @@ def register_user():
     password_hash = hashlib.sha256(password.encode()).hexdigest()
 
     try:
-        conn = get_db_connection()
+        conn = db
         cursor = conn.cursor()
 
         # 1️⃣ Simpan data nasabah
