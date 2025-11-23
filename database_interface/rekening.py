@@ -2,8 +2,12 @@ from __future__ import annotations
 
 import random
 
-from .database import db
-from .CustomClasses import DataChanges, Status, InsufficientFundsError, ErrorType
+try:
+    from database import db
+    from CustomClasses import DataChanges, Status, InsufficientFundsError, ErrorType
+except:
+    from .database import db
+    from .CustomClasses import DataChanges, Status, InsufficientFundsError, ErrorType
 
 def generate_nomor_rekening() -> str:
     while True:

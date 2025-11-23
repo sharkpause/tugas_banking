@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from .database import db
-from .nasabah import Nasabah
-from .rekening import Rekening
+from database import db
+from nasabah import Nasabah
+from rekening import Rekening
 
 def nomor_telepon_ke_Nasabah(nomor_telepon: str) -> Nasabah | None:
     query: str = 'SELECT nama, email, nomor_telepon, alamat FROM nasabah WHERE nomor_telepon=%s'
