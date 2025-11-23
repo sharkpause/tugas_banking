@@ -1,4 +1,4 @@
-from manager import deposit, transfer, withdraw, buat_nasabah_baru, tutup_nasabah
+from manager import deposit, transfer, withdraw, buat_nasabah_baru, tutup_nasabah, fetch_semua_user
 from database import db
 
 def test_deposit(nasabah_don_in_db, nasabah_rachel_in_db):
@@ -94,3 +94,8 @@ def test_tutup_nasabah(nasabah_don_in_db, nasabah_rachel_in_db):
     select = 'SELECT status_buka FROM nasabah WHERE nomor_telepon=%s'
     assert db.fetch(select, (nasabah_don_in_db.nomor_telepon,))[0][0] == False
     assert db.fetch(select, (nasabah_rachel_in_db.nomor_telepon,))[0][0] == False
+
+def test_fetch_semua_user(nasabah_don_in_db, nasabah_rachel_in_db):
+    result = fetch_semua_user()
+
+    assert len(result) > 0
