@@ -35,7 +35,7 @@ class Nasabah:
     membuat nasabah baru yang langsung disimpan dalam database
 
     """
-    def __init__(self, nama: str, password: str, email: str, nomor_telepon: str, alamat: str, fetch: bool = False):
+    def __init__(self, nama: str, password: str | None, email: str, nomor_telepon: str, alamat: str, fetch: bool = False):
         nama: str = nama.strip()
         
         if password:
