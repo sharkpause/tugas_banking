@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from .nasabah import Nasabah
-from .rekening import Rekening
-from .riwayat_transaksi import RiwayatTransaksi as new_RT
+from nasabah import Nasabah
+from rekening import Rekening
+from riwayat_transaksi import new_RT
 
-from .database import db
-from .CustomClasses import JenisTransaksi, Status
+from database import db
+from CustomClasses import JenisTransaksi, Status
 
-from .helper import nomor_telepon_ke_Nasabah
+from helper import nomor_telepon_ke_Nasabah
 
 def deposit(
     jumlah_uang: int,
@@ -184,7 +184,7 @@ def fetch_semua_user() -> list:
         nasabah_arr: list[Nasabah] = []
 
         for row in result:
-            ntemp = Nasabah(row[0], None, row[1], row[2], row[3])
+            ntemp = Nasabah(row[0], None, row[1], row[2], row[3], True)
             rtemp = Rekening(row[4], row[5], row[6])
 
             ntemp.rekening = rtemp
