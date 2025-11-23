@@ -4,9 +4,14 @@ import mysql.connector
 import re
 import bcrypt
 
-from .database import db
-from .rekening import Rekening
-from .CustomClasses import ValidationError, DatabaseError, Status, ErrorType, ValidationErrorCode, CredentialsError
+try:
+    from database import db
+    from rekening import Rekening
+    from CustomClasses import ValidationError, DatabaseError, Status, ErrorType, ValidationErrorCode, CredentialsError
+except:
+    from .database import db
+    from .rekening import Rekening
+    from .CustomClasses import ValidationError, DatabaseError, Status, ErrorType, ValidationErrorCode, CredentialsError
 
 EMAIL_REGEX = r'^[\w\.-]+@[\w\.-]+\.\w+$'
 PHONE_REGEX = r'^08\d{8,11}$'
@@ -73,6 +78,16 @@ class Nasabah:
             self.rekening: Rekening = Rekening(result[0][0], result[0][1], result[0][2])
         except:
             self.rekening: Rekening = None
+
+    def __repr__(self) -> str:
+        return (
+            "Nasabah("
+            f'Nama: {self.__nama}, '
+            f'Email: {self.__email}, '
+            f'Nomor telepon: {self.__nomor_telepon}, '
+            f'Alamat: {self.__alamat}'
+            ")"
+        )
 
     @staticmethod
     def __hash_password(password: str) -> str:
