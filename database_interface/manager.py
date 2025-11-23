@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from .nasabah import Nasabah
 from .rekening import Rekening
-from .riwayat_transaksi import RiwayatTransaksi as RT, new_RT
+from .riwayat_transaksi import RiwayatTransaksi as new_RT
 
 from .database import db
-from .CustomClasses import JenisTransaksi, Status, TransactionError, DatabaseError
+from .CustomClasses import JenisTransaksi, Status
 
 from .helper import nomor_telepon_ke_Nasabah
 
@@ -132,7 +132,7 @@ def buat_nasabah_baru(nama: str, password: str, email: str, nomor_telepon: str, 
         db.rollback()
         raise
 
-def tutup_nasabah(nomor_telepon: str = None, email: str = None):
+def tutup_nasabah(nomor_telepon: str | None = None, email: str | None = None):
     try:
         if nomor_telepon:
             query: str = 'UPDATE nasabah SET status_buka = false WHERE nomor_telepon = %s'
