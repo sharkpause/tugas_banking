@@ -166,4 +166,31 @@ def login_nasabah(nomor_telepon: str, password: str):
     except:
         raise
 
-login_nasabah('081331509003', 'password')
+def fetch_semua_user() -> list:
+    '''
+
+    Function ini nge-return semua user dalam database dalam bentuk object nasabah
+    dengan nested object rekening (nasabah_contoh.rekening)
+
+    '''
+    try:
+        query = '''
+             SELECT n.nama, n.email, n.nomor_telepon, n.alamat, r.id_nasabah, r.nomor_rekening, r.jumlah_saldo
+             FROM rekening r
+             JOIN nasabah n ON r.id_nasabah = n.id
+            '''       
+        result = db.fetch(query, None)
+
+        nasabah_arr: list[Nasabah] = []
+
+        for row in result:
+            ntemp = Nasabah(row[0], None, row[1], row[2], row[3])
+            rtemp = Rekening(row[4], row[5], row[6])
+
+            ntemp.rekening = rtemp
+
+            nasabah_arr.append(ntemp)
+
+        return nasabah_arr
+    except:
+        raise
