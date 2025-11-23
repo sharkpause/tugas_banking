@@ -1,9 +1,13 @@
 from __future__ import annotations
 from datetime import datetime
 
-from .CustomClasses import Status, JenisTransaksi
 
-from .database import db
+try:
+    from database import db
+    from CustomClasses import Status, JenisTransaksi
+except:
+    from .database import db
+    from .CustomClasses import Status, JenisTransaksi
 
 class RiwayatTransaksi:
     """
@@ -46,16 +50,16 @@ class RiwayatTransaksi:
                 self.__datetime_transaksi
             )
 
-            row_id = db.exec_insert_query(query, val)
-            return row_id
+            return db.exec_insert_query(query, val)
         except Exception as e:
             db.rollback()
             raise DatabaseError({
                 'status': Status.ERROR,
                 'type': ErrorType.DATABASE,
-                'message': f'Tidak dapat membuat riwayat transaksi'
+                'message': f'Tidak dapat membuat riwayat transaksi\n{e}'
             })
     
+
     @property
     def nomor_rekening_sumber(self) -> str:
         return self.__nomor_rekening_sumber
