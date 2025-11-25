@@ -1,13 +1,21 @@
 from __future__ import annotations
 
-from nasabah import Nasabah
-from rekening import Rekening
-from riwayat_transaksi import new_RT
+try:
+    from nasabah import Nasabah
+    from rekening import Rekening
+    from riwayat_transaksi import new_RT
+    from database import db
+    from CustomClasses import JenisTransaksi, Status
 
-from database import db
-from CustomClasses import JenisTransaksi, Status
+    from helper import nomor_telepon_ke_Nasabah
+except:
+    from .nasabah import Nasabah
+    from .rekening import Rekening
+    from .riwayat_transaksi import new_RT
+    from .database import db
+    from .CustomClasses import JenisTransaksi, Status
 
-from helper import nomor_telepon_ke_Nasabah
+    from .helper import nomor_telepon_ke_Nasabah
 
 def deposit(
     jumlah_uang: int,
