@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from database_interface.riwayat_transaksi import RiwayatTransaksi
+
 try:
     from nasabah import Nasabah
     from rekening import Rekening
@@ -202,3 +204,17 @@ def fetch_semua_user() -> list:
         return nasabah_arr
     except:
         raise
+
+def fetch_riwayat_transaksi(nomor_rekening: str):
+    query: str = 'SELECT nomor_rekening_sumber, nomor_rekening_tujuan, jenis_transaksi, jumlah_uang, datetime_transaksi FROM riwayat_transaksi WHERE nomor_rekening_sumber=%s ORDER BY datetime_transaksi DESC'
+    values: tuple = (nomor_rekening,)
+
+    result = db.fetch(query, values)
+    rt_arr: list[RiwayatTransaksi] = []
+
+    for row in result:
+        rt_arr.append(
+            RiwayatTransaksi(row[0], row[1], row[2], row[3], row[4])
+        )
+
+    return rt_arr
