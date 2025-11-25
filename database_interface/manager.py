@@ -9,7 +9,7 @@ try:
     from database import db
     from CustomClasses import JenisTransaksi, Status
 
-    from helper import nomor_telepon_ke_Nasabah
+    from helper import nomor_telepon_ke_Nasabah, nomor_telepon_ke_Rekening
 except:
     from .nasabah import Nasabah
     from .rekening import Rekening
@@ -17,7 +17,7 @@ except:
     from .database import db
     from .CustomClasses import JenisTransaksi, Status
 
-    from .helper import nomor_telepon_ke_Nasabah
+    from .helper import nomor_telepon_ke_Nasabah, nomor_telepon_ke_Rekening
 
 def deposit(
     jumlah_uang: int,
@@ -170,6 +170,8 @@ def login_nasabah(nomor_telepon: str, password: str):
     try:
         nasabah = nomor_telepon_ke_Nasabah(nomor_telepon)
         result = nasabah._Nasabah__login(password)
+
+        nasabah.rekening = nomor_telepon_ke_Rekening(nasabah.nomor_telepon)
         
         result['object'] = nasabah
         return result

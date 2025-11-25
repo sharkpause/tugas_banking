@@ -45,13 +45,13 @@ class LoginPage(ttk.Frame):
             return
 
         try:
-            nasabah = login_nasabah(phone, password)   # <- panggil helper Abet
+            result = login_nasabah(phone, password)   # <- panggil helper Abet
         except Exception as e:
             messagebox.showerror("Login gagal", str(e))
             return
 
         # Simpan object nasabah ke controller agar bisa dipakai halaman lain
-        self.controller.current_user = nasabah
+        self.controller.current_user = result['object']
 
-        messagebox.showinfo("Sukses", f"Selamat datang, {nasabah.nama}!")
+        messagebox.showinfo("Sukses", f"Selamat datang, {self.controller.current_user.nama}!")
         self.controller.show_frame("DashboardPage")

@@ -9,6 +9,8 @@ class RiwayatPage(tk.Frame):
         super().__init__(parent)
         self.controller = controller
 
+        print(self.controller.current_user)
+
         tk.Label(self, text="Riwayat Transaksi", font=("Arial", 20, "bold")).pack(pady=10)
 
         # Treeview untuk menampilkan tabel transaksi

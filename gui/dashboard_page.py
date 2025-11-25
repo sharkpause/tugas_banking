@@ -8,6 +8,7 @@ class DashboardPage(ttk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
+        print(controller.current_user)
 
         self.label_title = ttk.Label(self, text="Dashboard", font=("Segoe UI", 18, "bold"))
         self.label_title.pack(pady=20)
@@ -44,7 +45,7 @@ class DashboardPage(ttk.Frame):
             text="Logout", width=25,
             command=self.logout
         ).pack(pady=10)
-        
+
         ttk.Button(
             self,
             text="Riwayat Transaksi",
@@ -61,6 +62,7 @@ class DashboardPage(ttk.Frame):
         try:
             user = self.controller.current_user
             rekening = user.rekening  # langsung dapat object rekening
+
             self.label_nama.config(text=f"Nama: {user.nama}")
             self.label_nomor_rekening.config(text=f"Nomor Rekening: {rekening.nomor_rekening}")
             self.label_saldo.config(text=f"Saldo: {rekening.jumlah_saldo}")
