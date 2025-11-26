@@ -9,8 +9,6 @@ class RiwayatPage(tk.Frame):
         super().__init__(parent)
         self.controller = controller
 
-        print(self.controller.current_user)
-
         tk.Label(self, text="Riwayat Transaksi", font=("Arial", 20, "bold")).pack(pady=10)
 
         # Treeview untuk menampilkan tabel transaksi
@@ -41,7 +39,7 @@ class RiwayatPage(tk.Frame):
 
     def load_data(self):
         """Hitung ulang data transaksi setiap kali halaman dibuka."""
-        rekening = self.controller.current_rekening
+        rekening = self.controller.current_user.rekening
 
         if rekening is None:
             messagebox.showerror("Error", "Rekening tidak ditemukan.")
@@ -66,7 +64,7 @@ class RiwayatPage(tk.Frame):
                 "",
                 tk.END,
                 values=(
-                    t.datetime_transaksi.strftime("%Y-%m-%d %H:%M:%S"),
+                    t.datetime_transaksi,
                     t.jenis_transaksi,
                     t.jumlah_uang,
                     t.nomor_rekening_sumber,
