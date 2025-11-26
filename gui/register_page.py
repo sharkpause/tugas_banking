@@ -42,14 +42,14 @@ class RegisterPage(ttk.Frame):
         self.entry_password.grid(row=4, column=1, pady=5)
 
         # Tombol daftar
-        ttk.Button(self, text="Daftar", command=self.register).pack(pady=15)
+        ttk.Button(self, text="Daftar", command=self.do_register).pack(pady=15)
 
         # Tombol kembali ke login
         ttk.Button(self, text="Kembali ke Login",
                    command=lambda: controller.show_frame("LoginPage")
                    ).pack()
 
-    def register(self):
+    def do_register(self):
         nama = self.entry_nama.get().strip()
         email = self.entry_email.get().strip()
         phone = self.entry_phone.get().strip()
