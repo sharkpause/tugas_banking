@@ -216,7 +216,7 @@ def fetch_riwayat_transaksi(nomor_rekening: str):
 
     for row in result:
         rt_arr.append(
-            RiwayatTransaksi(row[0], row[1], row[2], row[3], row[4])
+            RiwayatTransaksi(row[0], row[1], row[2], row[3], row[4].strftime('%Y-%m-%d %H:%M:%S'))
         )
 
     return rt_arr
