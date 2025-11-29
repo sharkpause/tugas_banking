@@ -13,28 +13,37 @@ class LoginPage(ttk.Frame):
         title = ttk.Label(self, text="Login Nasabah", font=("Segoe UI", 18, "bold"))
         title.pack(pady=20)
 
-        # Frame untuk input
         form = ttk.Frame(self)
         form.pack(pady=10)
 
-        # Nomor telepon
         ttk.Label(form, text="Nomor Telepon:").grid(row=0, column=0, sticky="w", pady=5)
         self.entry_phone = ttk.Entry(form, width=30)
         self.entry_phone.grid(row=0, column=1, pady=5)
 
-        # Password
         ttk.Label(form, text="Password:").grid(row=1, column=0, sticky="w", pady=5)
         self.entry_password = ttk.Entry(form, width=30, show="*")
         self.entry_password.grid(row=1, column=1, pady=5)
 
-        # Tombol login
+        self.showing = False
+        self.toggle_btn = ttk.Button(self, text="Show", command=self.toggle_password)
+        self.toggle_btn.pack(pady=15)
+
         btn_login = ttk.Button(self, text="Login", command=self.login)
         btn_login.pack(pady=15)
 
-        # Tombol ke register
         ttk.Button(self, text="Daftar Akun Baru",
-                   command=lambda: controller.show_frame("RegisterPage")
-                   ).pack()
+            command=lambda: controller.show_frame("RegisterPage")
+        ).pack()
+
+    def toggle_password(self):
+        if self.showing:
+            self.showing = False
+            self.entry_password.config(show='*')
+            self.toggle_btn.config(text="Show")
+        else:
+            self.showing = True
+            self.entry_password.config(show='')
+            self.toggle_btn.config(text="Hide")
 
     def login(self):
         phone = self.entry_phone.get().strip()
