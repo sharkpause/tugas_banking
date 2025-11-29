@@ -25,8 +25,8 @@ class LoginPage(ttk.Frame):
         self.entry_password.grid(row=1, column=1, pady=5)
 
         self.showing = False
-        self.toggle_btn = ttk.Button(self, text="Show", command=self.toggle_password)
-        self.toggle_btn.pack(pady=15)
+        self.toggle_btn = ttk.Button(form, text="Show", command=self.toggle_password)
+        self.toggle_btn.grid(row=1, column=2, pady=5)
 
         btn_login = ttk.Button(self, text="Login", command=self.login)
         btn_login.pack(pady=15)
