@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox
 
 # Import fungsi buat nasabah baru sesuai aturan Abet
 from database_interface.manager import buat_nasabah_baru
+from database_interface.CustomClasses import ValidationError
 
 class RegisterPage(ttk.Frame):
     def __init__(self, parent, controller):
@@ -42,14 +43,14 @@ class RegisterPage(ttk.Frame):
         self.entry_password.grid(row=4, column=1, pady=5)
 
         # Tombol daftar
-        ttk.Button(self, text="Daftar", command=self.register).pack(pady=15)
+        ttk.Button(self, text="Daftar", command=self.do_register).pack(pady=15)
 
         # Tombol kembali ke login
         ttk.Button(self, text="Kembali ke Login",
                    command=lambda: controller.show_frame("LoginPage")
                    ).pack()
 
-    def register(self):
+    def do_register(self):
         nama = self.entry_nama.get().strip()
         email = self.entry_email.get().strip()
         phone = self.entry_phone.get().strip()
@@ -68,6 +69,12 @@ class RegisterPage(ttk.Frame):
                 nomor_telepon=phone,
                 alamat=alamat
             )
+        except ValidationError as e:
+            fields = e.errors['errors']
+            msg = ''
+
+            for field in fields:
+                msg += field['message'] + '\n'
         except Exception as e:
             messagebox.showerror("Gagal", str(e))
             return

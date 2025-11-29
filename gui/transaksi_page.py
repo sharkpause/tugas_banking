@@ -59,6 +59,7 @@ class TransaksiPage(ttk.Frame):
         waktu = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         try:
+            print(user)
             deposit(jumlah, waktu, rekening)
         except Exception as e:
             messagebox.showerror("Gagal", str(e))

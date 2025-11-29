@@ -71,13 +71,13 @@ class Nasabah:
         self.__alamat: str = alamat
 
         try:
-            query: str = 'SELECT id_nasabah, nomor_rekening, jumlah_saldo FROM rekening WHERE nomor_rekening=%s'
-            val: tuple = (nomor_rekening,)
+            query: str = 'SELECT r.id_nasabah, r.nomor_rekening, r.jumlah_saldo FROM rekening r JOIN nasabah n WHERE n.nomor_telepon=%s'
+            val: tuple = (nomor_telepon,)
             
             result: list[tuple] = db.fetch(query, val)
-            self.rekening: Rekening = Rekening(result[0][0], result[0][1], result[0][2])
+            self.rekening: Rekening | None = Rekening(result[0][0], result[0][1], result[0][2])
         except:
-            self.rekening: Rekening = None
+            self.rekening: Rekening | None = None
 
     def __repr__(self) -> str:
         return (

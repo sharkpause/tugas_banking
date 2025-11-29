@@ -1,5 +1,4 @@
 import tkinter as tk
-from tkinter import ttk
 
 # Import semua halaman GUI
 from gui.login_page import LoginPage
@@ -9,19 +8,23 @@ from gui.transfer_page import TransferPage
 from gui.transaksi_page import TransaksiPage
 from gui.riwayat_page import RiwayatPage
 
+from ttkbootstrap import Style
+from ttkbootstrap.constants import *
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Tugas Banking - ATM App")
-        self.geometry("500x500")
+        self.geometry("800x500")
+
+        self.style = Style(theme='superhero')
 
         # Variable global untuk user yang sedang login
         self.current_user = None
         self.current_rekening = None
 
         container = tk.Frame(self)
-        container.pack(fill="both", expand=True)
+        container.pack(expand=True)
 
         self.frames = {}
 
