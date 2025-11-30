@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections import defaultdict
+from datetime import datetime
 
 try:
     from nasabah import Nasabah
@@ -225,28 +227,23 @@ def fetch_riwayat_transaksi(nomor_rekening: str):
 def fetch_aliran_uang(nomor_rekening: str):
     rt_arr = fetch_riwayat_transaksi(nomor_rekening)
 
-    total_uang_masuk = 0
-    total_uang_keluar = 0
+    monthly_aliran = defaultdict(lambda: {'total_uang_masuk': 0, 'total_uang_keluar': 0})
 
     for rt in rt_arr:
+        month_key = rt.datetime_transaksi.strftime('%Y-%m')
+
         match rt.jenis_transaksi:
             case StringJenisTransaksi.DEPOSIT:
-                total_uang_masuk += rt.jumlah_uang
+                monthly_aliran[month_key]['total_uang_masuk'] += rt.jumlah_uang
             case StringJenisTransaksi.WITHDRAW:
-                total_uang_keluar += rt.jumlah_uang
+                monthly_aliran[month_key]['total_uang_keluar'] += rt.jumlah_uang
             case StringJenisTransaksi.TRANSFER:
                 if(rt.nomor_rekening_tujuan == nomor_rekening):
-                    total_uang_masuk += rt.jumlah_uang
+                    monthly_aliran[month_key]['total_uang_masuk'] += rt.jumlah_uang
                 else:
-                    total_uang_keluar += rt.jumlah_uang
+                    monthly_aliran[month_key]['total_uang_keluar'] += rt.jumlah_uang
 
-    return {
-        'total_uang_masuk': total_uang_masuk,
-        'total_uang_keluar': total_uang_keluar
-    }
-
-
-
+    return monthly_aliran
 
 # TESTING CODE
 print(fetch_aliran_uang('89556137620373224647'))
