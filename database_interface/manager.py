@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from database_interface.riwayat_transaksi import RiwayatTransaksi
 
 try:
     from nasabah import Nasabah
     from rekening import Rekening
     from riwayat_transaksi import new_RT
     from database import db
-    from CustomClasses import JenisTransaksi, Status
+    from CustomClasses import JenisTransaksi, Status, StringJenisTransaksi
+    from riwayat_transaksi import RiwayatTransaksi
 
     from helper import nomor_telepon_ke_Nasabah, nomor_telepon_ke_Rekening
 except:
@@ -15,7 +15,8 @@ except:
     from .rekening import Rekening
     from .riwayat_transaksi import new_RT
     from .database import db
-    from .CustomClasses import JenisTransaksi, Status
+    from .CustomClasses import JenisTransaksi, Status, StringJenisTransaksi
+    from .riwayat_transaksi import RiwayatTransaksi
 
     from .helper import nomor_telepon_ke_Nasabah, nomor_telepon_ke_Rekening
 
@@ -220,3 +221,40 @@ def fetch_riwayat_transaksi(nomor_rekening: str):
         )
 
     return rt_arr
+
+def fetch_aliran_uang(nomor_rekening: str):
+    rt_arr = fetch_riwayat_transaksi(nomor_rekening)
+
+    query: str = 'SELECT nomor_rekening_sumber, nomor_rekening_tujuan, jenis_transaksi, jumlah_uang, datetime_transaksi FROM riwayat_transaksi WHERE nomor_rekening_tujuan=%s ORDER BY datetime_transaksi DESC'
+    values: tuple = (nomor_rekening,)
+    result = db.fetch(query, values)
+    for row in result:
+        rt_arr.append(
+            RiwayatTransaksi(row[0], row[1], row[2], row[3], row[4].strftime('%Y-%m-%d %H:%M:%S'))
+        )
+
+    total_uang_masuk = 0
+    total_uang_keluar = 0
+
+    for rt in rt_arr:
+        match rt.jenis_transaksi:
+            case StringJenisTransaksi.DEPOSIT:
+                total_uang_masuk += rt.jumlah_uang
+            case StringJenisTransaksi.WITHDRAW:
+                total_uang_keluar += rt.jumlah_uang
+            case StringJenisTransaksi.TRANSFER:
+                if(rt.nomor_rekening_tujuan == nomor_rekening):
+                    total_uang_masuk += rt.jumlah_uang
+                else:
+                    total_uang_keluar += rt.jumlah_uang
+
+    return {
+        'total_uang_masuk': total_uang_masuk,
+        'total_uang_keluar': total_uang_keluar
+    }
+
+
+
+
+# TESTING CODE
+print(fetch_aliran_uang('89556137620373224647'))
