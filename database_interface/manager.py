@@ -1,13 +1,15 @@
 from __future__ import annotations
 
-from database_interface.riwayat_transaksi import RiwayatTransaksi
+from collections import defaultdict
+from datetime import datetime
 
 try:
     from nasabah import Nasabah
     from rekening import Rekening
     from riwayat_transaksi import new_RT
     from database import db
-    from CustomClasses import JenisTransaksi, Status
+    from CustomClasses import JenisTransaksi, Status, StringJenisTransaksi
+    from riwayat_transaksi import RiwayatTransaksi
 
     from helper import nomor_telepon_ke_Nasabah, nomor_telepon_ke_Rekening
 except:
@@ -15,7 +17,8 @@ except:
     from .rekening import Rekening
     from .riwayat_transaksi import new_RT
     from .database import db
-    from .CustomClasses import JenisTransaksi, Status
+    from .CustomClasses import JenisTransaksi, Status, StringJenisTransaksi
+    from .riwayat_transaksi import RiwayatTransaksi
 
     from .helper import nomor_telepon_ke_Nasabah, nomor_telepon_ke_Rekening
 
@@ -208,8 +211,8 @@ def fetch_semua_user() -> list:
         raise
 
 def fetch_riwayat_transaksi(nomor_rekening: str):
-    query: str = 'SELECT nomor_rekening_sumber, nomor_rekening_tujuan, jenis_transaksi, jumlah_uang, datetime_transaksi FROM riwayat_transaksi WHERE nomor_rekening_sumber=%s ORDER BY datetime_transaksi DESC'
-    values: tuple = (nomor_rekening,)
+    query: str = 'SELECT nomor_rekening_sumber, nomor_rekening_tujuan, jenis_transaksi, jumlah_uang, datetime_transaksi FROM riwayat_transaksi WHERE nomor_rekening_sumber=%s OR nomor_rekening_tujuan=%s ORDER BY datetime_transaksi DESC'
+    values: tuple = (nomor_rekening, nomor_rekening)
 
     result = db.fetch(query, values)
     rt_arr: list[RiwayatTransaksi] = []
@@ -220,3 +223,27 @@ def fetch_riwayat_transaksi(nomor_rekening: str):
         )
 
     return rt_arr
+
+def fetch_aliran_uang(nomor_rekening: str):
+    rt_arr = fetch_riwayat_transaksi(nomor_rekening)
+
+    monthly_aliran = defaultdict(lambda: {'total_uang_masuk': 0, 'total_uang_keluar': 0})
+
+    for rt in rt_arr:
+        month_key = rt.datetime_transaksi.strftime('%Y-%m')
+
+        match rt.jenis_transaksi:
+            case StringJenisTransaksi.DEPOSIT:
+                monthly_aliran[month_key]['total_uang_masuk'] += rt.jumlah_uang
+            case StringJenisTransaksi.WITHDRAW:
+                monthly_aliran[month_key]['total_uang_keluar'] += rt.jumlah_uang
+            case StringJenisTransaksi.TRANSFER:
+                if(rt.nomor_rekening_tujuan == nomor_rekening):
+                    monthly_aliran[month_key]['total_uang_masuk'] += rt.jumlah_uang
+                else:
+                    monthly_aliran[month_key]['total_uang_keluar'] += rt.jumlah_uang
+
+    return monthly_aliran
+
+# TESTING CODE
+print(fetch_aliran_uang('89556137620373224647'))
