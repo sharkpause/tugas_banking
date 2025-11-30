@@ -209,8 +209,8 @@ def fetch_semua_user() -> list:
         raise
 
 def fetch_riwayat_transaksi(nomor_rekening: str):
-    query: str = 'SELECT nomor_rekening_sumber, nomor_rekening_tujuan, jenis_transaksi, jumlah_uang, datetime_transaksi FROM riwayat_transaksi WHERE nomor_rekening_sumber=%s ORDER BY datetime_transaksi DESC'
-    values: tuple = (nomor_rekening,)
+    query: str = 'SELECT nomor_rekening_sumber, nomor_rekening_tujuan, jenis_transaksi, jumlah_uang, datetime_transaksi FROM riwayat_transaksi WHERE nomor_rekening_sumber=%s OR nomor_rekening_tujuan=%s ORDER BY datetime_transaksi DESC'
+    values: tuple = (nomor_rekening, nomor_rekening)
 
     result = db.fetch(query, values)
     rt_arr: list[RiwayatTransaksi] = []
@@ -224,14 +224,6 @@ def fetch_riwayat_transaksi(nomor_rekening: str):
 
 def fetch_aliran_uang(nomor_rekening: str):
     rt_arr = fetch_riwayat_transaksi(nomor_rekening)
-
-    query: str = 'SELECT nomor_rekening_sumber, nomor_rekening_tujuan, jenis_transaksi, jumlah_uang, datetime_transaksi FROM riwayat_transaksi WHERE nomor_rekening_tujuan=%s ORDER BY datetime_transaksi DESC'
-    values: tuple = (nomor_rekening,)
-    result = db.fetch(query, values)
-    for row in result:
-        rt_arr.append(
-            RiwayatTransaksi(row[0], row[1], row[2], row[3], row[4].strftime('%Y-%m-%d %H:%M:%S'))
-        )
 
     total_uang_masuk = 0
     total_uang_keluar = 0
