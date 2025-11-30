@@ -20,26 +20,31 @@ class CredentialsError(Exception):
     def __init__(self, message):
         super().__init__(message)
 
-class Status(Enum):
+class Status:
     ERROR = 1
     SUCCESS = 0
 
-class ErrorType(Enum):
+class ErrorType:
     VALIDATION = 1
     DATABASE = 2
     INSUFFICIENT_FUNDS = 3
     MISSING_ARGUMENT = 4
     CREDENTIALS = 5
 
-class ValidationErrorCode(Enum):
+class ValidationErrorCode:
     EMPTY = 1
     INVALID_FORMAT = 2
     DUPLICATE = 3
 
-class DataChanges(Enum):
+class DataChanges:
     JUMLAH_SALDO = 1
 
-class JenisTransaksi(Enum):
+class JenisTransaksi:
     DEPOSIT = 1
     WITHDRAW = 2
     TRANSFER = 3
+
+class StringJenisTransaksi:
+    DEPOSIT = 'deposit'
+    WITHDRAW = 'withdraw'
+    TRANSFER = 'transfer'
