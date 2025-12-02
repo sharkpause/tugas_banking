@@ -79,6 +79,8 @@ class DashboardPage(ttk.Frame):
             )
         ).pack(pady=10)
 
+        # TODO: Tampilkan teks "Kemasukan bulan ini: {uang}" dan "Pengeluaran bulan ini: {uang}"
+
 
     def tkraise(self, *args, **kwargs):
         """Override tkraise supaya data user di-refresh setiap kali halaman muncul"""
