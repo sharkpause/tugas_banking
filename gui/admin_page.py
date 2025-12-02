@@ -14,8 +14,6 @@ class AdminLoginFrame (tk.Frame) :
 
         self._build()
 
-        print(on_success)
-
     def _build (self):
         lbl = tk.Label(self, text= "Admin Mode - Login", font=('Segoe UI', 14, 'bold'))
         lbl.pack(pady=8)
@@ -33,7 +31,6 @@ class AdminLoginFrame (tk.Frame) :
         tk.Button(btn_frame, text="Back", command=lambda: self.master.show_main()).pack(side='left', padx=6)
 
     def _try_login(self):
-        print(f'token_var: {self.token_var.get().strip()}')
         token = self.token_var.get().strip()
         if not token:
             messagebox.showwarning("Token kosong", "Masukkan token admin terlebih dahulu")
@@ -127,16 +124,21 @@ class AdminDashboardFrame(tk.Frame):
                 email = getattr(nasabah, 'email', '-')
                 telepon = getattr(nasabah, 'nomor_telepon', '-')
                 display = getattr(nasabah, 'nama', '<tanpa nama>')
-                uid = id(nasabah)
-                self.tree.insert('', 'end', iid=str(uid), values=(email, telepon), text=display)
-                # collect rekening
+                # Use nomor_telepon as persistent iid if available, otherwise fallback
+                uid = str(nasabah.nomor_telepon) if hasattr(nasabah, 'nomor_telepon') else str(id(nasabah))
+                
+                self.tree.insert('', 'end', iid=uid, values=(email, telepon), text=display)
+                
+                # collect rekening(s)
                 if hasattr(nasabah, 'rekening') and nasabah.rekening:
                     for r in nasabah.rekening:
                         no = getattr(r, 'nomor_rekening', None)
                         if no:
                             self.rekening_map[no] = r
-            except Exception:
+            except Exception as e:
+                print(f"Error processing nasabah {getattr(nasabah, 'nomor_telepon', '<unknown>')}: {e}")
                 continue
+    
         self._set_status(f'Ditemukan {len(self.users)} nasabah')
 
     def _on_user_select(self, event):
@@ -147,11 +149,12 @@ class AdminDashboardFrame(tk.Frame):
         # find nasabah by id
         nas = None
         for n in self.users:
-            if str(id(n)) == uid:
+            if str(n.nomor_telepon) == uid:
                 nas = n
                 break
         if nas is None:
             return
+
         # show details
         lines = []
         lines.append(f"Nama: {getattr(nas, 'nama', '-')}")

@@ -7,11 +7,11 @@ import bcrypt
 try:
     from database import db
     from rekening import Rekening
-    from CustomClasses import ValidationError, DatabaseError, Status, ErrorType, ValidationErrorCode, CredentialsError
+    from CustomClasses import ValidationError, DatabaseError, Status, ErrorType, ValidationErrorCode, CredentialsError, JenisRekening
 except:
     from .database import db
     from .rekening import Rekening
-    from .CustomClasses import ValidationError, DatabaseError, Status, ErrorType, ValidationErrorCode, CredentialsError
+    from .CustomClasses import ValidationError, DatabaseError, Status, ErrorType, ValidationErrorCode, CredentialsError, JenisRekening
 
 EMAIL_REGEX = r'^[\w\.-]+@[\w\.-]+\.\w+$'
 PHONE_REGEX = r'^\d{8,13}$'
@@ -64,20 +64,27 @@ class Nasabah:
 
         self.__nama: str = nama
 
-        if not fetch: self.__password: str = Nasabah.__hash_password(password)
+        if not fetch and password:
+            self.__password: str | None = Nasabah.__hash_password(password)
         
         self.__email: str = email
         self.__nomor_telepon: str = nomor_telepon
         self.__alamat: str = alamat
 
+        self.__id = None
+
+        self.rekening = []
+
         try:
-            query: str = 'SELECT r.id_nasabah, r.nomor_rekening, r.jumlah_saldo FROM rekening r JOIN nasabah n WHERE n.nomor_telepon=%s'
+            query: str = 'SELECT r.id_nasabah, r.nomor_rekening, r.jumlah_saldo FROM rekening r JOIN nasabah n ON r.id_nasabah = n.id WHERE n.nomor_telepon=%s'
             val: tuple = (nomor_telepon,)
             
             result: list[tuple] = db.fetch(query, val)
-            self.rekening: Rekening | None = Rekening(result[0][0], result[0][1], result[0][2])
+
+            for row in result:
+                self.rekening: list[Rekening] = [Rekening(row[0], row[1], row[2])]
         except:
-            self.rekening: Rekening | None = None
+            self.rekening: list[Rekening] = []
 
     def __repr__(self) -> str:
         return (
@@ -196,20 +203,33 @@ class Nasabah:
                 'message': 'User antara salah nomor telepon atau salah password'
             })
 
-    def __create_new_rekening(self) -> Status.SUCCESS | Status.ERROR:
-        if not self.__id:
-            raise DatabaseError({
+    def __create_new_rekening(self, jenis_rekening: JenisRekening) -> Status:
+        if self.__id is None:
+            if(not self.__check_exists()):
+                raise DatabaseError({
                     'status': Status.ERROR,
                     'type': ErrorType.DATABASE,
                     'message': "Can't create a new rekening before a new nasabah in the database"
                 })
         
-        self.rekening = Rekening(self.__id)
-        self.rekening._Rekening__create_in_database()
+        newRekening = Rekening(self.__id, jenis_rekening=jenis_rekening)
+        self.rekening.append(newRekening)
+        newRekening._Rekening__create_in_database()
 
         return Status.SUCCESS
+    
+    def __check_exists(self):
+        query: str = 'SELECT id FROM nasabah WHERE nomor_telepon = %s'
+        values: tuple = (self.__nomor_telepon,)
 
-    def __create_in_database(self) -> Status.SUCCESS | Status.ERROR:
+        result = db.fetch(query, values)
+
+        if result:
+            self.__id = result[0][0]
+            return True
+        return False
+
+    def __create_in_database(self) -> Status:
         query: str = 'INSERT INTO nasabah (nama, password, email, nomor_telepon, alamat) VALUES (%s, %s, %s, %s, %s)'
         values: tuple = (self.__nama, self.__password, self.__email, self.__nomor_telepon, self.__alamat)
 
