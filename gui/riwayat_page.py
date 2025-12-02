@@ -29,6 +29,18 @@ class RiwayatPage(tk.Frame):
 
         self.tree.pack(padx=20, pady=10)
 
+        # Label total masuk dan keluat
+        self.label_total_masuk = tk.Label(
+            self, text="Total Uang Masuk: -", font=("Arial", 12)  
+        )
+        self.label_total_masuk.pack(pady=(5, 0))
+
+        self.label_total_keluar = tk.label(
+            self, text="Total Uang Keluar: -",font=("Arial", 12)
+        )
+        self.label_total_keluar.pack(pady=(0, 10))
+
+
         # Tombol kembali
         ttk.Button(
             self,
@@ -73,3 +85,28 @@ class RiwayatPage(tk.Frame):
             )
 
         # TODO: Tampilkan total uang keluar dan masuk untuk semua bulan
+        
+        total_masuk = 0
+        total_keluar = 0
+
+        for t in riwayat:
+            # Transfer masuk ke rekening user
+            if t.nomor_rekening_tujuan == nomor_rekening:
+                total_masuk += t.jumlah_uang
+
+            # Transfer keluar dari rekening user
+            if t.nomor_rekening_sumber == nomor_rekening:
+                total_keluar += t.jumlah_uang
+
+            # Deposit
+            if t.jenis_transaksi.lower() == "deposit":
+                total_masuk += t.jumlah_uang
+            
+            # Withdraw
+            if t.jenis_transaksi.lower() == "withdraw":
+                total_keluar += t.jumlah_uang
+     
+
+        # Tampilkan Total Di Label
+        self.label_total_masuk.config(text=f"Total Uang Masuk: {total_masuk}")
+        self.label_total_keluar.config(text=f"Total Uang Keluar: {total_keluar}")
