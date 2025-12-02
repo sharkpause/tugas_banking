@@ -3,12 +3,14 @@ from __future__ import annotations
 from collections import defaultdict
 from datetime import datetime
 
+from database_interface.CustomClasses import CredentialsError
+
 try:
     from nasabah import Nasabah
     from rekening import Rekening
     from riwayat_transaksi import new_RT
     from database import db
-    from CustomClasses import JenisTransaksi, Status, StringJenisTransaksi
+    from CustomClasses import JenisTransaksi, Status, StringJenisTransaksi, ErrorType
     from riwayat_transaksi import RiwayatTransaksi
 
     from helper import nomor_telepon_ke_Nasabah, nomor_telepon_ke_Rekening
@@ -17,7 +19,7 @@ except:
     from .rekening import Rekening
     from .riwayat_transaksi import new_RT
     from .database import db
-    from .CustomClasses import JenisTransaksi, Status, StringJenisTransaksi
+    from .CustomClasses import JenisTransaksi, Status, StringJenisTransaksi, ErrorType
     from .riwayat_transaksi import RiwayatTransaksi
 
     from .helper import nomor_telepon_ke_Nasabah, nomor_telepon_ke_Rekening
@@ -211,6 +213,13 @@ def fetch_semua_user() -> list:
         raise
 
 def fetch_riwayat_transaksi(nomor_rekening: str):
+    """
+    Function untuk mengambil riwayat transaksi total user,
+
+    nomor_rekening: str 
+
+    return: array[RiwayatTransaksi]
+    """
     query: str = 'SELECT nomor_rekening_sumber, nomor_rekening_tujuan, jenis_transaksi, jumlah_uang, datetime_transaksi FROM riwayat_transaksi WHERE nomor_rekening_sumber=%s OR nomor_rekening_tujuan=%s ORDER BY datetime_transaksi DESC'
     values: tuple = (nomor_rekening, nomor_rekening)
 
@@ -225,6 +234,15 @@ def fetch_riwayat_transaksi(nomor_rekening: str):
     return rt_arr
 
 def fetch_aliran_uang(nomor_rekening: str):
+    """
+    Function untuk mengambil aliran uang total user dibagi bulanan
+
+    nomor_rekening: str 
+
+    return: array[dict[dict]]
+        dict: 'month_key': { 'total_uang_masuk': number, 'total_uang_keluar': number }
+        example: '2025-11': { 'total_uang_masuk': 20000, 'total_uang_keluar': 15000 }
+    """
     rt_arr = fetch_riwayat_transaksi(nomor_rekening)
 
     monthly_aliran = defaultdict(lambda: {'total_uang_masuk': 0, 'total_uang_keluar': 0})
@@ -244,6 +262,32 @@ def fetch_aliran_uang(nomor_rekening: str):
                     monthly_aliran[month_key]['total_uang_keluar'] += rt.jumlah_uang
 
     return monthly_aliran
+
+def login_admin(token: str):
+    """
+    Function ini digunakan untuk login admin lewat admin token dalam database
+
+    token: str 
+
+    return: 0 (int, code success)
+        or an error:
+            'status': Status.ERROR,
+            'type': ErrorType.CREDENTIALS
+            'message': 'Token admin salah'
+    """
+
+    query: str = 'SELECT token FROM admin';
+    result = db.fetch(query)
+
+    if token == result[0][0]:
+        return 0
+    else:
+        raise CredentialsError({
+            'status': Status.ERROR,
+            'type': ErrorType.CREDENTIALS,
+            'message': 'Token admin salah'
+        })
+
 
 # TESTING CODE
 print(fetch_aliran_uang('89556137620373224647'))
