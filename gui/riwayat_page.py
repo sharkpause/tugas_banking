@@ -35,7 +35,7 @@ class RiwayatPage(tk.Frame):
         )
         self.label_total_masuk.pack(pady=(5, 0))
 
-        self.label_total_keluar = tk.label(
+        self.label_total_keluar = tk.Label(
             self, text="Total Uang Keluar: -",font=("Arial", 12)
         )
         self.label_total_keluar.pack(pady=(0, 10))
@@ -91,12 +91,13 @@ class RiwayatPage(tk.Frame):
 
         for t in riwayat:
             # Transfer masuk ke rekening user
-            if t.nomor_rekening_tujuan == nomor_rekening:
-                total_masuk += t.jumlah_uang
+            if t.jenis_transaksi == 'transfer':
+                if t.nomor_rekening_tujuan == nomor_rekening:
+                    total_masuk += t.jumlah_uang
 
-            # Transfer keluar dari rekening user
-            if t.nomor_rekening_sumber == nomor_rekening:
-                total_keluar += t.jumlah_uang
+                # Transfer keluar dari rekening user
+                if t.nomor_rekening_sumber == nomor_rekening:
+                    total_keluar += t.jumlah_uang
 
             # Deposit
             if t.jenis_transaksi.lower() == "deposit":
