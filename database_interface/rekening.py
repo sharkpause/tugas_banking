@@ -4,10 +4,10 @@ import random
 
 try:
     from database import db
-    from CustomClasses import DataChanges, Status, InsufficientFundsError, ErrorType
+    from CustomClasses import DataChanges, Status, InsufficientFundsError, ErrorType, JenisRekening, StringJenisRekening, DatabaseError
 except:
     from .database import db
-    from .CustomClasses import DataChanges, Status, InsufficientFundsError, ErrorType
+    from .CustomClasses import DataChanges, Status, InsufficientFundsError, ErrorType, JenisRekening, StringJenisRekening, DatabaseError
 
 def generate_nomor_rekening() -> str:
     while True:
@@ -47,7 +47,17 @@ class Rekening:
 
     """
 
-    def __init__(self, id_nasabah: int, nomor_rekening: str = None, jumlah_saldo: int = 0):
+    def __init__(self,
+                 id_nasabah: int,
+                 nomor_rekening: str | None = None,
+                 jumlah_saldo: int = 0,
+                 jenis_rekening: JenisRekening = JenisRekening.CHECKING):
+
+        jenis_rekening_map = {
+            JenisRekening.CHECKING: StringJenisRekening.CHECKING,
+            JenisRekening.SAVINGS: StringJenisRekening.SAVINGS
+        }
+        self.__jenis_rekening = jenis_rekening_map[jenis_rekening]
         if nomor_rekening:
             self.__nomor_rekening: str = nomor_rekening
         else:
@@ -57,24 +67,27 @@ class Rekening:
         
         self.__id_pemilik: int = id_nasabah
     
-    def __create_in_database(self) -> Status.SUCCESS | Status.ERROR:
-        query: str = 'INSERT INTO rekening (id_nasabah, nomor_rekening, jumlah_saldo) VALUES (%s, %s, %s)'
+    def __create_in_database(self) -> Status:
+        query: str = 'INSERT INTO rekening (id_nasabah, nomor_rekening, jumlah_saldo, jenis_rekening) VALUES (%s, %s, %s, %s)'
         
-        while True:
+        while True: # Loop cuz generate_nomor_rekening might generate the same number
             self.__nomor_rekening = generate_nomor_rekening()
-            val: tuple = (self.__id_pemilik, self.__nomor_rekening, self.__jumlah_saldo)
+            val: tuple = (self.__id_pemilik, self.__nomor_rekening, self.__jumlah_saldo, self.__jenis_rekening)
 
             try:
                 db.exec_insert_query(query, val)
+                db.commit()
                 break
             except mysql.connector.IntegrityError as e:
                 if e.errno == db.DUPLICATE_ERRNO:
                     continue
                 raise
+            except:
+                raise
 
         return Status.SUCCESS
 
-    def __increase_balance(self, jumlah_uang: int) -> Status.SUCCESS | Status.ERROR:
+    def __increase_balance(self, jumlah_uang: int) -> Status:
         self.__previous_saldo = self.__jumlah_saldo
         self.__jumlah_saldo += jumlah_uang
 
@@ -82,7 +95,7 @@ class Rekening:
 
         return Status.SUCCESS
     
-    def __decrease_balance(self, jumlah_uang: int) -> Status.SUCCESS | Status.ERROR:
+    def __decrease_balance(self, jumlah_uang: int) -> Status:
         if jumlah_uang > self.__jumlah_saldo:
             raise InsufficientFundsError({
                 'status': Status.ERROR,
@@ -109,7 +122,7 @@ class Rekening:
     def id_pemilik(self) -> int:
         return self.__id_pemilik
     
-    def __save_to_database(self, changes: DataChanges) -> Status.SUCCESS | Status.ERROR:
+    def __save_to_database(self, changes: DataChanges):
         try:
             if changes == DataChanges.JUMLAH_SALDO:
                 query: str = 'UPDATE rekening SET jumlah_saldo = %s WHERE nomor_rekening = %s'
@@ -123,5 +136,3 @@ class Rekening:
             db.rollback()
             self.__jumlah_saldo = self.__previous_saldo
             raise DatabaseError(f'Commit failed: {e}')
-
-            return Status.ERROR

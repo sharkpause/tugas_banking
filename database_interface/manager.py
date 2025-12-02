@@ -3,14 +3,12 @@ from __future__ import annotations
 from collections import defaultdict
 from datetime import datetime
 
-from database_interface.CustomClasses import CredentialsError
-
 try:
     from nasabah import Nasabah
     from rekening import Rekening
     from riwayat_transaksi import new_RT
     from database import db
-    from CustomClasses import JenisTransaksi, Status, StringJenisTransaksi, ErrorType
+    from CustomClasses import JenisTransaksi, Status, StringJenisTransaksi, ErrorType, JenisRekening, StringJenisRekening, CredentialsError
     from riwayat_transaksi import RiwayatTransaksi
 
     from helper import nomor_telepon_ke_Nasabah, nomor_telepon_ke_Rekening
@@ -19,7 +17,7 @@ except:
     from .rekening import Rekening
     from .riwayat_transaksi import new_RT
     from .database import db
-    from .CustomClasses import JenisTransaksi, Status, StringJenisTransaksi, ErrorType
+    from .CustomClasses import JenisTransaksi, Status, StringJenisTransaksi, ErrorType, JenisRekening, StringJenisRekening
     from .riwayat_transaksi import RiwayatTransaksi
 
     from .helper import nomor_telepon_ke_Nasabah, nomor_telepon_ke_Rekening
@@ -147,6 +145,23 @@ def buat_nasabah_baru(nama: str, password: str, email: str, nomor_telepon: str, 
         db.rollback()
         raise
 
+def buat_rekening_baru(nomor_telepon: str, jenis_rekening: JenisRekening):
+    """
+    Membuat rekening baru dalam database untuk satu nasabah
+
+    nomor_telepon: str 
+    jenis_rekening: JenisRekening.CHECKING | JenisRekening.SAVINGS
+    """
+
+    try:
+        n = nomor_telepon_ke_Nasabah(nomor_telepon)
+        n._Nasabah__create_new_rekening(jenis_rekening)
+
+        return 0
+    except:
+        db.rollback()
+        raise
+
 def tutup_nasabah(nomor_telepon: str | None = None, email: str | None = None):
     try:
         if nomor_telepon:
@@ -192,23 +207,25 @@ def fetch_semua_user() -> list:
     '''
     try:
         query = '''
-             SELECT n.nama, n.email, n.nomor_telepon, n.alamat, r.id_nasabah, r.nomor_rekening, r.jumlah_saldo
-             FROM rekening r
-             JOIN nasabah n ON r.id_nasabah = n.id
-            '''       
+            SELECT n.nama, n.email, n.nomor_telepon, n.alamat, r.id_nasabah, r.nomor_rekening, r.jumlah_saldo
+            FROM rekening r
+            JOIN nasabah n ON r.id_nasabah = n.id
+        '''
         result = db.fetch(query, None)
 
-        nasabah_arr: list[Nasabah] = []
+        nasabah_dict: dict[str, Nasabah] = {}
 
         for row in result:
-            ntemp = Nasabah(row[0], None, row[1], row[2], row[3], True)
-            rtemp = Rekening(row[4], row[5], row[6])
+            id_nasabah = row[4]
 
-            ntemp.rekening = rtemp
+            if id_nasabah not in nasabah_dict:
+                nasabah_dict[id_nasabah] = Nasabah(row[0], None, row[1], row[2], row[3], True)
+                nasabah_dict[id_nasabah].rekening = []
 
-            nasabah_arr.append(ntemp)
+            rekening_obj = Rekening(row[4], row[5], row[6])
+            nasabah_dict[id_nasabah].rekening.append(rekening_obj)
 
-        return nasabah_arr
+        return list(nasabah_dict.values())
     except:
         raise
 
@@ -279,10 +296,6 @@ def login_admin(token: str):
     query: str = 'SELECT token FROM admin';
     result = db.fetch(query)
 
-    print('\n\n')
-    print(token)
-    print(result[0][0])
-
     if token == result[0][0]:
         return 0
     else:
@@ -291,7 +304,3 @@ def login_admin(token: str):
             'type': ErrorType.CREDENTIALS,
             'message': 'Token admin salah'
         })
-
-
-# TESTING CODE
-print(fetch_aliran_uang('89556137620373224647'))
