@@ -71,3 +71,5 @@ class RiwayatPage(tk.Frame):
                     t.nomor_rekening_tujuan
                 )
             )
+
+        # TODO: Tampilkan total uang keluar dan masuk untuk semua bulan
