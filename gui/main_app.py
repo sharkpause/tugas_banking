@@ -7,6 +7,7 @@ from gui.dashboard_page import DashboardPage
 from gui.transfer_page import TransferPage
 from gui.transaksi_page import TransaksiPage
 from gui.riwayat_page import RiwayatPage
+from gui.admin_page import AdminPage
 
 from ttkbootstrap import Style
 from ttkbootstrap.constants import *
@@ -36,6 +37,7 @@ class App(tk.Tk):
             "TransferPage": TransferPage,
             "TransaksiPage": TransaksiPage,        # Deposit / Withdraw
             "RiwayatPage": RiwayatPage,
+            "AdminPage": AdminPage
         }
 
         # Generate frame
