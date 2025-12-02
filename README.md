@@ -5,3 +5,4 @@ TODO:
 [] - /gui/dashboard_page.py
 [] - /gui/riwayat_page.py
 [] - Make more robust filtering in fetch riwayat /database_interface/manager.py
+[] - Make user allow to have more than one rekening

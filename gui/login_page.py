@@ -35,6 +35,10 @@ class LoginPage(ttk.Frame):
             command=lambda: controller.show_frame("RegisterPage")
         ).pack()
 
+        ttk.Button(self, text="Login sebagai admin",
+            command=lambda: controller.show_frame("AdminPage")
+        ).pack()
+
     def toggle_password(self):
         if self.showing:
             self.showing = False

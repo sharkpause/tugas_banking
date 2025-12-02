@@ -279,6 +279,10 @@ def login_admin(token: str):
     query: str = 'SELECT token FROM admin';
     result = db.fetch(query)
 
+    print('\n\n')
+    print(token)
+    print(result[0][0])
+
     if token == result[0][0]:
         return 0
     else:

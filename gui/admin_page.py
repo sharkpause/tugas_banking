@@ -1,12 +1,23 @@
+from datetime import datetime
+
+import tkinter as tk
+from tkinter import ttk
+
+from tkinter import messagebox, simpledialog
+from database_interface.manager import login_admin, fetch_semua_user, deposit, withdraw, transfer, fetch_riwayat_transaksi
 
 class AdminLoginFrame (tk.Frame) :
-    def __init__ (self, master, on_success, args, kwargs) :
-        super ().__init__(master, args, kwargs)
+    def __init__ (self, master, on_success) :
+        super ().__init__(master)
+
         self.on_success = on_success
+
         self._build()
 
+        print(on_success)
+
     def _build (self):
-        lbl = tk.Label(self, text= "Admin Mode - Login", font=(None, 14, 'bold'))
+        lbl = tk.Label(self, text= "Admin Mode - Login", font=('Segoe UI', 14, 'bold'))
         lbl.pack(pady=8)
 
         frm = tk.Frame (self)
@@ -22,15 +33,13 @@ class AdminLoginFrame (tk.Frame) :
         tk.Button(btn_frame, text="Back", command=lambda: self.master.show_main()).pack(side='left', padx=6)
 
     def _try_login(self):
+        print(f'token_var: {self.token_var.get().strip()}')
         token = self.token_var.get().strip()
         if not token:
             messagebox.showwarning("Token kosong", "Masukkan token admin terlebih dahulu")
             return
-        if manager is None:
-            messagebox.showerror 
-            return
         try:
-            res = manager.login_admin(token)
+            res = login_admin(token)
             # per spec, success returns 0
             if res == 0:
                 self.on_success()
@@ -56,7 +65,7 @@ class AdminDashboardFrame(tk.Frame):
     def _build(self):
         hdr = tk.Frame(self)
         hdr.pack(fill='x', pady=6)
-        tk.Label(hdr, text="Admin Dashboard", font=(None, 14, 'bold').pack(side='left', padx=6)
+        tk.Label(hdr, text="Admin Dashboard", font=(None, 14, 'bold')).pack(side='left', padx=6)
         tk.Button(hdr, text="Refresh", command=self._refresh_users).pack(side='right', padx=6)
         tk.Button(hdr, text="Logout", command=lambda: self.master.show_login()).pack(side='right')
 
@@ -102,12 +111,8 @@ class AdminDashboardFrame(tk.Frame):
 
     def _refresh_users(self):
         self._set_status('Mengambil daftar nasabah...')
-        if manager is None:
-            messagebox.showerror("Konfigurasi error", "database_interface.manager tidak ditemukan. Hubungi Abet.")
-            self._set_status('Error')
-            return
         try:
-            self.users = manager.fetch_semua_user()
+            self.users = fetch_semua_user()
         except Exception as e:
             messagebox.showerror("Fetch error", f"Gagal mengambil data nasabah: {e}")
             self._set_status('Error')
@@ -181,7 +186,7 @@ class AdminDashboardFrame(tk.Frame):
             return
         dt = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         try:
-            tid = manager.deposit(amt, dt, rek)
+            tid = deposit(amt, dt, rek)
             messagebox.showinfo("Sukses", f"Deposit berhasil. ID transaksi: {tid}")
             self._refresh_users()
         except Exception as e:
@@ -196,7 +201,7 @@ class AdminDashboardFrame(tk.Frame):
             return
         dt = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         try:
-            res = manager.withdraw(amt, dt, rek)
+            res = withdraw(amt, dt, rek)
             # per spec return Status.SUCCESS | Status.ERROR or RiwayatTransaksi ID
             if isinstance(res, int):
                 messagebox.showinfo("Sukses", f"Withdraw berhasil. ID: {res}")
@@ -228,7 +233,7 @@ class AdminDashboardFrame(tk.Frame):
             return
         dt = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         try:
-            tid = manager.transfer(amt, dt, src, tgt)
+            tid = transfer(amt, dt, src, tgt)
             messagebox.showinfo("Sukses", f"Transfer berhasil. ID transaksi: {tid}")
             self._refresh_users()
         except Exception as e:
@@ -243,7 +248,7 @@ class AdminDashboardFrame(tk.Frame):
             messagebox.showerror("Error", "Nomor rekening tidak valid.")
             return
         try:
-            rows = manager.fetch_riwayat_transaksi(no)
+            rows = fetch_riwayat_transaksi(no)
         except Exception as e:
             messagebox.showerror("Error", f"Gagal mengambil riwayat: {e}")
             return
@@ -269,10 +274,13 @@ class AdminDashboardFrame(tk.Frame):
             txt.insert('end', line)
 
 
-class AdminPanel(tk.Frame):
-    def __init__(self, master, *args, **kwargs):
-        super().__init__(master, *args, **kwargs)
-        self.pack(fill='both', expand=True)
+class AdminPage(tk.Frame):
+    def __init__(self, master, controller):
+        super().__init__(master)
+
+        self.frame = ttk.Frame(self)
+
+        self.frame.pack(fill='both', expand=True)
         self.login_frame = AdminLoginFrame(self, on_success=self._show_dashboard)
         self.dashboard = AdminDashboardFrame(self)
         self.login_frame.pack(fill='both', expand=True)
@@ -286,8 +294,5 @@ class AdminPanel(tk.Frame):
         self.login_frame.pack(fill='both', expand=True)
 
     def show_main(self):
-        # convenience - in case integrated in main app
         self.master.show_main()
-
-
 
