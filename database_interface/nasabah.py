@@ -82,7 +82,7 @@ class Nasabah:
 
         try:
             query: str = '''
-                SELECT r.id_nasabah, r.nomor_rekening, r.jumlah_saldo, r.jenis_rekening 
+                SELECT r.id_nasabah, r.nomor_rekening, r.jumlah_saldo, r.jenis_rekening, r.status_buka 
                 FROM rekening r JOIN nasabah n ON r.id_nasabah = n.id 
                 WHERE n.nomor_telepon=%s
             '''
@@ -91,7 +91,20 @@ class Nasabah:
             result: list[tuple] = db.fetch(query, val)
 
             for row in result:
-                self.rekening.append(Rekening(row[0], row[1], row[2], jenis_rekening_map[row[3]]))
+                status_buka = True
+
+                if row[4] == 1:
+                    status_buka = True
+                elif row[4] == 0:
+                    status_buka = False
+                print(status_buka)
+                self.rekening.append(Rekening(
+                    row[0],
+                    row[1],
+                    row[2],
+                    jenis_rekening_map[row[3]],
+                    status_buka
+                ))
         except Exception as e:
             print(e)
             self.rekening: list[Rekening] = []

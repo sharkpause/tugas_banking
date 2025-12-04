@@ -175,6 +175,19 @@ def tutup_rekening(nomor_rekening: str) -> Status:
         db.rollback()
         raise
 
+def buka_rekening(nomor_rekening: str) -> Status:
+    try:
+        query: str = 'UPDATE rekening SET status_buka = true WHERE nomor_rekening = %s'
+        val: tuple = (nomor_rekening,)
+
+        db.exec_query(query, val)
+        db.commit()
+
+        return Status.SUCCESS
+    except:
+        db.rollback()
+        raise
+
 def login_nasabah(nomor_telepon: str, password: str):
     '''
 
@@ -205,7 +218,7 @@ def fetch_semua_user() -> list:
         }
 
         query = '''
-            SELECT n.nama, n.email, n.nomor_telepon, n.alamat, r.id_nasabah, r.nomor_rekening, r.jumlah_saldo, r.jenis_rekening
+            SELECT n.nama, n.email, n.nomor_telepon, n.alamat, r.id_nasabah, r.nomor_rekening, r.jumlah_saldo, r.jenis_rekening, r.status_buka
             FROM rekening r
             JOIN nasabah n ON r.id_nasabah = n.id
         '''
@@ -220,7 +233,7 @@ def fetch_semua_user() -> list:
                 nasabah_dict[id_nasabah] = Nasabah(row[0], None, row[1], row[2], row[3], True)
                 nasabah_dict[id_nasabah].rekening = []
 
-            rekening_obj = Rekening(row[4], row[5], row[6], jenis_rekening_map[row[7]])
+            rekening_obj = Rekening(row[4], row[5], row[6], jenis_rekening_map[row[7]], row[8])
             nasabah_dict[id_nasabah].rekening.append(rekening_obj)
 
         return list(nasabah_dict.values())

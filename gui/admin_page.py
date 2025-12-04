@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from tkinter import messagebox, simpledialog
-from database_interface.manager import login_admin, fetch_semua_user, deposit, withdraw, transfer, fetch_riwayat_transaksi, tutup_rekening
+from database_interface.manager import login_admin, fetch_semua_user, deposit, withdraw, transfer, fetch_riwayat_transaksi, tutup_rekening, buka_rekening
 
 class AdminLoginFrame (tk.Frame) :
     def __init__ (self, master, on_success, controller) :
@@ -100,6 +100,7 @@ class AdminDashboardFrame(tk.Frame):
         tk.Button(action_fr, text="Transfer", command=self._action_transfer).pack(side='left', padx=4)
         tk.Button(action_fr, text="Riwayat Transaksi", command=self._action_riwayat).pack(side='left', padx=4)
         tk.Button(action_fr, text="Tutup rekening", command=self._action_tutup).pack(side='left', padx=4)
+        tk.Button(action_fr, text="Buka rekening", command=self._action_buka).pack(side='left', padx=4)
 
         # status
         self.status_var = tk.StringVar(value='Siap')
@@ -109,6 +110,14 @@ class AdminDashboardFrame(tk.Frame):
         try:
             nomor_rekening = self._get_selected_rekening().nomor_rekening
             tutup_rekening(nomor_rekening)
+        except Exception as e:
+            print(e)
+            messagebox.showerror("Admin Error", "Terjadi kesalahan tolong coba lagi!")
+
+    def _action_buka(self):
+        try:
+            nomor_rekening = self._get_selected_rekening().nomor_rekening
+            buka_rekening(nomor_rekening)
         except Exception as e:
             print(e)
             messagebox.showerror("Admin Error", "Terjadi kesalahan tolong coba lagi!")
@@ -177,10 +186,19 @@ class AdminDashboardFrame(tk.Frame):
         self.acc_listbox.delete(0, 'end')
         if hasattr(nas, 'rekening') and nas.rekening:
             for r in nas.rekening:
+                print(r)
                 no = getattr(r, 'nomor_rekening', '<no>')
                 saldo = getattr(r, 'jumlah_saldo', 0)
                 jenis = getattr(r, 'jenis_rekening', 'checking')
-                self.acc_listbox.insert('end', f"{no} | {jenis} | Saldo: {saldo}")
+                status = getattr(r, 'status_buka', 'unknown')
+
+                print(r.status_buka)
+                if status == True:
+                    status = 'buka'
+                elif status == False:
+                    status = 'tutup'
+
+                self.acc_listbox.insert('end', f"{no} | {status} | {jenis} | Saldo: {saldo}")
 
     def _get_selected_rekening(self):
         sel_idx = self.acc_listbox.curselection()
