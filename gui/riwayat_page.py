@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 
 import matplotlib
-matplotlib.use("TkAgg")
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
@@ -10,6 +9,8 @@ from matplotlib.ticker import MaxNLocator
 
 from database_interface.manager import fetch_aliran_uang, fetch_riwayat_transaksi
 from .utils.currency import indo
+
+matplotlib.use("TkAgg")
 
 class RiwayatPage(tk.Frame):
     def __init__(self, parent, controller):
