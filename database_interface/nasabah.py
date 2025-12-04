@@ -163,7 +163,7 @@ class Nasabah:
             errors.append({
                 'field': 'email', 
                 'code': ValidationErrorCode.INVALID_FORMAT, 
-                'message': f'Format email {email} tidak benar'
+                'message': f'Format email "{email}" tidak benar'
             })
         elif db.fetch(email_duplicate_query, email_duplicate_values):
             errors.append({
@@ -182,7 +182,7 @@ class Nasabah:
             errors.append({
                 'field': 'nomor_telepon',
                 'code': ValidationErrorCode.INVALID_FORMAT,
-                'message': f'Format nomor telepon {nomor_telepon} tidak benar'
+                'message': f'Format nomor telepon "{nomor_telepon}" tidak benar'
             })
         elif db.fetch(nomor_telepon_duplicate_query, nomor_telepon_duplicate_values):
             errors.append({
@@ -226,7 +226,7 @@ class Nasabah:
                 'message': 'User antara salah nomor telepon atau salah password'
             })
 
-    def __create_new_rekening(self, jenis_rekening: JenisRekening) -> Status:
+    def __create_new_rekening(self, jenis_rekening: JenisRekening = JenisRekening.CHECKING) -> Status:
         if self.__id is None:
             if(not self.__check_exists()):
                 raise DatabaseError({
