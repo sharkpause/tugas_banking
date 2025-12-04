@@ -28,6 +28,5 @@ class PilihRekeningPage(ttk.Frame):
             btn.pack(pady=5)
 
     def select_rekening(self, rekening):
-        print(f"Selected rekening: {rekening.nomor_rekening}")
         self.controller.selected_rekening = rekening
-
+        self.controller.show_frame('DashboardPage')

@@ -50,7 +50,7 @@ class TransaksiPage(ttk.Frame):
 
     def do_deposit(self):
         user = self.controller.current_user
-        rekening = user.rekening
+        rekening = self.controller.selected_rekening
 
         jumlah = self.get_amount()
         if jumlah is None:
@@ -59,7 +59,6 @@ class TransaksiPage(ttk.Frame):
         waktu = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         try:
-            print(user)
             deposit(jumlah, waktu, rekening)
         except Exception as e:
             messagebox.showerror("Gagal", str(e))
@@ -72,7 +71,7 @@ class TransaksiPage(ttk.Frame):
 
     def do_withdraw(self):
         user = self.controller.current_user
-        rekening = user.rekening
+        rekening = self.controller.selected_rekening
 
         jumlah = self.get_amount()
         if jumlah is None:

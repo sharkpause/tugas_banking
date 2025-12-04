@@ -51,7 +51,7 @@ class RiwayatPage(tk.Frame):
 
     def load_data(self):
         """Hitung ulang data transaksi setiap kali halaman dibuka."""
-        rekening = self.controller.current_user.rekening
+        rekening = self.controller.selected_rekening
 
         if rekening is None:
             messagebox.showerror("Error", "Rekening tidak ditemukan.")

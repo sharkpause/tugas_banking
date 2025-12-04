@@ -101,10 +101,9 @@ class DashboardPage(ttk.Frame):
         ).pack(pady=10)
 
     def tkraise(self, *args, **kwargs):
-        """Override tkraise supaya data user di-refresh setiap kali halaman muncul"""
         try:
             user = self.controller.current_user
-            rekening = user.rekening  # langsung dapat object rekening
+            rekening = self.controller.selected_rekening  # langsung dapat object rekening
 
             self.label_nama.config(text=f"{user.nama}")
             self.label_nomor_rekening.config(text=f"{rekening.nomor_rekening}")
