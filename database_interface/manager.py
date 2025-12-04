@@ -204,8 +204,13 @@ def fetch_semua_user() -> list:
 
     '''
     try:
+        jenis_rekening_map = {
+            'checking': JenisRekening.CHECKING,
+            'savings': JenisRekening.SAVINGS 
+        }
+
         query = '''
-            SELECT n.nama, n.email, n.nomor_telepon, n.alamat, r.id_nasabah, r.nomor_rekening, r.jumlah_saldo
+            SELECT n.nama, n.email, n.nomor_telepon, n.alamat, r.id_nasabah, r.nomor_rekening, r.jumlah_saldo, r.jenis_rekening
             FROM rekening r
             JOIN nasabah n ON r.id_nasabah = n.id
         '''
@@ -220,7 +225,7 @@ def fetch_semua_user() -> list:
                 nasabah_dict[id_nasabah] = Nasabah(row[0], None, row[1], row[2], row[3], True)
                 nasabah_dict[id_nasabah].rekening = []
 
-            rekening_obj = Rekening(row[4], row[5], row[6])
+            rekening_obj = Rekening(row[4], row[5], row[6], jenis_rekening_map[row[7]])
             nasabah_dict[id_nasabah].rekening.append(rekening_obj)
 
         return list(nasabah_dict.values())

@@ -7,10 +7,11 @@ from tkinter import messagebox, simpledialog
 from database_interface.manager import login_admin, fetch_semua_user, deposit, withdraw, transfer, fetch_riwayat_transaksi
 
 class AdminLoginFrame (tk.Frame) :
-    def __init__ (self, master, on_success) :
+    def __init__ (self, master, on_success, controller) :
         super ().__init__(master)
 
         self.on_success = on_success
+        self.controller = controller
 
         self._build()
 
@@ -28,7 +29,7 @@ class AdminLoginFrame (tk.Frame) :
         btn_frame = tk.Frame(self)
         btn_frame.pack(pady=10)
         tk.Button(btn_frame, text="Login", command=self._try_login).pack(side='left', padx=6)
-        tk.Button(btn_frame, text="Back", command=lambda: self.master.show_main()).pack(side='left', padx=6)
+        tk.Button(btn_frame, text="Back", command=lambda: self.controller.show_frame('LoginPage')).pack(side='left', padx=6)
 
     def _try_login(self):
         token = self.token_var.get().strip()
@@ -64,7 +65,7 @@ class AdminDashboardFrame(tk.Frame):
         hdr.pack(fill='x', pady=6)
         tk.Label(hdr, text="Admin Dashboard", font=(None, 14, 'bold')).pack(side='left', padx=6)
         tk.Button(hdr, text="Refresh", command=self._refresh_users).pack(side='right', padx=6)
-        tk.Button(hdr, text="Logout", command=lambda: self.master.show_login()).pack(side='right')
+        tk.Button(hdr, text="Logout", command=lambda: self.master.controller.show_frame('LoginPage')).pack(side='right')
 
         # Split left: user list, right: details
         body = tk.PanedWindow(self, orient='horizontal')
@@ -169,7 +170,8 @@ class AdminDashboardFrame(tk.Frame):
             for r in nas.rekening:
                 no = getattr(r, 'nomor_rekening', '<no>')
                 saldo = getattr(r, 'jumlah_saldo', 0)
-                self.acc_listbox.insert('end', f"{no} — Saldo: {saldo}")
+                jenis = getattr(r, 'jenis_rekening', 'checking')
+                self.acc_listbox.insert('end', f"{no} | {jenis} | Saldo: {saldo}")
 
     def _get_selected_rekening(self):
         sel_idx = self.acc_listbox.curselection()
@@ -281,10 +283,12 @@ class AdminPage(tk.Frame):
     def __init__(self, master, controller):
         super().__init__(master)
 
+        self.controller = controller
+
         self.frame = ttk.Frame(self)
 
         self.frame.pack(fill='both', expand=True)
-        self.login_frame = AdminLoginFrame(self, on_success=self._show_dashboard)
+        self.login_frame = AdminLoginFrame(self, on_success=self._show_dashboard, controller=controller)
         self.dashboard = AdminDashboardFrame(self)
         self.login_frame.pack(fill='both', expand=True)
 
@@ -297,5 +301,5 @@ class AdminPage(tk.Frame):
         self.login_frame.pack(fill='both', expand=True)
 
     def show_main(self):
-        self.master.show_main()
+        self.controller.show_frame('LoginPage')
 
