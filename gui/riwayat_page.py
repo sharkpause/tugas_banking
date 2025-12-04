@@ -52,7 +52,6 @@ class RiwayatPage(tk.Frame):
     def load_data(self):
         """Hitung ulang data transaksi setiap kali halaman dibuka."""
         rekening = self.controller.selected_rekening
-
         if rekening is None:
             messagebox.showerror("Error", "Rekening tidak ditemukan.")
             return
@@ -84,8 +83,6 @@ class RiwayatPage(tk.Frame):
                 )
             )
 
-        # TODO: Tampilkan total uang keluar dan masuk untuk semua bulan
-        
         informasi_aliran = fetch_aliran_uang(rekening.nomor_rekening)
         total_masuk = 0
         total_keluar = 0
