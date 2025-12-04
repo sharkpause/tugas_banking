@@ -4,13 +4,14 @@ import tkinter as tk
 from tkinter import ttk
 
 from tkinter import messagebox, simpledialog
-from database_interface.manager import login_admin, fetch_semua_user, deposit, withdraw, transfer, fetch_riwayat_transaksi
+from database_interface.manager import login_admin, fetch_semua_user, deposit, withdraw, transfer, fetch_riwayat_transaksi, tutup_rekening, buka_rekening
 
 class AdminLoginFrame (tk.Frame) :
-    def __init__ (self, master, on_success) :
+    def __init__ (self, master, on_success, controller) :
         super ().__init__(master)
 
         self.on_success = on_success
+        self.controller = controller
 
         self._build()
 
@@ -28,7 +29,7 @@ class AdminLoginFrame (tk.Frame) :
         btn_frame = tk.Frame(self)
         btn_frame.pack(pady=10)
         tk.Button(btn_frame, text="Login", command=self._try_login).pack(side='left', padx=6)
-        tk.Button(btn_frame, text="Back", command=lambda: self.master.show_main()).pack(side='left', padx=6)
+        tk.Button(btn_frame, text="Back", command=lambda: self.controller.show_frame('LoginPage')).pack(side='left', padx=6)
 
     def _try_login(self):
         token = self.token_var.get().strip()
@@ -64,7 +65,7 @@ class AdminDashboardFrame(tk.Frame):
         hdr.pack(fill='x', pady=6)
         tk.Label(hdr, text="Admin Dashboard", font=(None, 14, 'bold')).pack(side='left', padx=6)
         tk.Button(hdr, text="Refresh", command=self._refresh_users).pack(side='right', padx=6)
-        tk.Button(hdr, text="Logout", command=lambda: self.master.show_login()).pack(side='right')
+        tk.Button(hdr, text="Logout", command=lambda: self.master.controller.show_frame('LoginPage')).pack(side='right')
 
         # Split left: user list, right: details
         body = tk.PanedWindow(self, orient='horizontal')
@@ -98,10 +99,28 @@ class AdminDashboardFrame(tk.Frame):
         tk.Button(action_fr, text="Withdraw", command=self._action_withdraw).pack(side='left', padx=4)
         tk.Button(action_fr, text="Transfer", command=self._action_transfer).pack(side='left', padx=4)
         tk.Button(action_fr, text="Riwayat Transaksi", command=self._action_riwayat).pack(side='left', padx=4)
+        tk.Button(action_fr, text="Tutup rekening", command=self._action_tutup).pack(side='left', padx=4)
+        tk.Button(action_fr, text="Buka rekening", command=self._action_buka).pack(side='left', padx=4)
 
         # status
         self.status_var = tk.StringVar(value='Siap')
         tk.Label(self, textvariable=self.status_var, anchor='w').pack(fill='x', padx=6, pady=(0,6))
+
+    def _action_tutup(self):
+        try:
+            nomor_rekening = self._get_selected_rekening().nomor_rekening
+            tutup_rekening(nomor_rekening)
+        except Exception as e:
+            print(e)
+            messagebox.showerror("Admin Error", "Terjadi kesalahan tolong coba lagi!")
+
+    def _action_buka(self):
+        try:
+            nomor_rekening = self._get_selected_rekening().nomor_rekening
+            buka_rekening(nomor_rekening)
+        except Exception as e:
+            print(e)
+            messagebox.showerror("Admin Error", "Terjadi kesalahan tolong coba lagi!")
 
     def _set_status(self, text):
         self.status_var.set(text)
@@ -167,9 +186,19 @@ class AdminDashboardFrame(tk.Frame):
         self.acc_listbox.delete(0, 'end')
         if hasattr(nas, 'rekening') and nas.rekening:
             for r in nas.rekening:
+                print(r)
                 no = getattr(r, 'nomor_rekening', '<no>')
                 saldo = getattr(r, 'jumlah_saldo', 0)
-                self.acc_listbox.insert('end', f"{no} — Saldo: {saldo}")
+                jenis = getattr(r, 'jenis_rekening', 'checking')
+                status = getattr(r, 'status_buka', 'unknown')
+
+                print(r.status_buka)
+                if status == True:
+                    status = 'buka'
+                elif status == False:
+                    status = 'tutup'
+
+                self.acc_listbox.insert('end', f"{no} | {status} | {jenis} | Saldo: {saldo}")
 
     def _get_selected_rekening(self):
         sel_idx = self.acc_listbox.curselection()
@@ -177,7 +206,7 @@ class AdminDashboardFrame(tk.Frame):
             messagebox.showwarning("Pilih rekening", "Pilih rekening terlebih dahulu pada daftar rekening.")
             return None
         text = self.acc_listbox.get(sel_idx)
-        no = text.split(' — ')[0]
+        no = text.split(' | ')[0]
         return self.rekening_map.get(no)
 
     def _action_deposit(self):
@@ -281,10 +310,12 @@ class AdminPage(tk.Frame):
     def __init__(self, master, controller):
         super().__init__(master)
 
+        self.controller = controller
+
         self.frame = ttk.Frame(self)
 
         self.frame.pack(fill='both', expand=True)
-        self.login_frame = AdminLoginFrame(self, on_success=self._show_dashboard)
+        self.login_frame = AdminLoginFrame(self, on_success=self._show_dashboard, controller=controller)
         self.dashboard = AdminDashboardFrame(self)
         self.login_frame.pack(fill='both', expand=True)
 
@@ -297,5 +328,5 @@ class AdminPage(tk.Frame):
         self.login_frame.pack(fill='both', expand=True)
 
     def show_main(self):
-        self.master.show_main()
+        self.controller.show_frame('LoginPage')
 

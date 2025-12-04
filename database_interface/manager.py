@@ -162,20 +162,28 @@ def buat_rekening_baru(nomor_telepon: str, jenis_rekening: JenisRekening):
         db.rollback()
         raise
 
-def tutup_nasabah(nomor_telepon: str | None = None, email: str | None = None):
+def tutup_rekening(nomor_rekening: str) -> Status:
     try:
-        if nomor_telepon:
-            query: str = 'UPDATE nasabah SET status_buka = false WHERE nomor_telepon = %s'
-            val: tuple = (nomor_telepon,)
+        query: str = 'UPDATE rekening SET status_buka = false WHERE nomor_rekening = %s'
+        val: tuple = (nomor_rekening,)
 
-            db.exec_query(query, val)
-            db.commit()
-        elif email:
-            query: str = 'UPDATE nasabah SET status_buka = false WHERE email = %s'
-            val: tuple = (email,)
+        db.exec_query(query, val)
+        db.commit()
 
-            db.exec_query(query, val)
-            db.commit()
+        return Status.SUCCESS
+    except:
+        db.rollback()
+        raise
+
+def buka_rekening(nomor_rekening: str) -> Status:
+    try:
+        query: str = 'UPDATE rekening SET status_buka = true WHERE nomor_rekening = %s'
+        val: tuple = (nomor_rekening,)
+
+        db.exec_query(query, val)
+        db.commit()
+
+        return Status.SUCCESS
     except:
         db.rollback()
         raise
@@ -204,8 +212,13 @@ def fetch_semua_user() -> list:
 
     '''
     try:
+        jenis_rekening_map = {
+            'checking': JenisRekening.CHECKING,
+            'savings': JenisRekening.SAVINGS 
+        }
+
         query = '''
-            SELECT n.nama, n.email, n.nomor_telepon, n.alamat, r.id_nasabah, r.nomor_rekening, r.jumlah_saldo
+            SELECT n.nama, n.email, n.nomor_telepon, n.alamat, r.id_nasabah, r.nomor_rekening, r.jumlah_saldo, r.jenis_rekening, r.status_buka
             FROM rekening r
             JOIN nasabah n ON r.id_nasabah = n.id
         '''
@@ -220,7 +233,7 @@ def fetch_semua_user() -> list:
                 nasabah_dict[id_nasabah] = Nasabah(row[0], None, row[1], row[2], row[3], True)
                 nasabah_dict[id_nasabah].rekening = []
 
-            rekening_obj = Rekening(row[4], row[5], row[6])
+            rekening_obj = Rekening(row[4], row[5], row[6], jenis_rekening_map[row[7]], row[8])
             nasabah_dict[id_nasabah].rekening.append(rekening_obj)
 
         return list(nasabah_dict.values())

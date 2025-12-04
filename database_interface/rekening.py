@@ -51,13 +51,16 @@ class Rekening:
                  id_nasabah: int,
                  nomor_rekening: str | None = None,
                  jumlah_saldo: int = 0,
-                 jenis_rekening: JenisRekening = JenisRekening.CHECKING):
+                 jenis_rekening: JenisRekening = JenisRekening.CHECKING,
+                 status_buka: boolean = True):
 
         jenis_rekening_map = {
             JenisRekening.CHECKING: StringJenisRekening.CHECKING,
             JenisRekening.SAVINGS: StringJenisRekening.SAVINGS
         }
         self.__jenis_rekening = jenis_rekening_map[jenis_rekening]
+
+        self.__status_buka = status_buka
         if nomor_rekening:
             self.__nomor_rekening: str = nomor_rekening
         else:
@@ -123,8 +126,12 @@ class Rekening:
         return self.__id_pemilik
 
     @property
-    def jenis_rekening(self) -> int:
+    def jenis_rekening(self) -> str:
         return self.__jenis_rekening
+    
+    @property
+    def status_buka(self) -> bool:
+        return self.__status_buka
     
     def __save_to_database(self, changes: DataChanges):
         try:
