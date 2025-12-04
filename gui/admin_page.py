@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from tkinter import messagebox, simpledialog
-from database_interface.manager import login_admin, fetch_semua_user, deposit, withdraw, transfer, fetch_riwayat_transaksi
+from database_interface.manager import login_admin, fetch_semua_user, deposit, withdraw, transfer, fetch_riwayat_transaksi, tutup_rekening
 
 class AdminLoginFrame (tk.Frame) :
     def __init__ (self, master, on_success, controller) :
@@ -99,10 +99,19 @@ class AdminDashboardFrame(tk.Frame):
         tk.Button(action_fr, text="Withdraw", command=self._action_withdraw).pack(side='left', padx=4)
         tk.Button(action_fr, text="Transfer", command=self._action_transfer).pack(side='left', padx=4)
         tk.Button(action_fr, text="Riwayat Transaksi", command=self._action_riwayat).pack(side='left', padx=4)
+        tk.Button(action_fr, text="Tutup rekening", command=self._action_tutup).pack(side='left', padx=4)
 
         # status
         self.status_var = tk.StringVar(value='Siap')
         tk.Label(self, textvariable=self.status_var, anchor='w').pack(fill='x', padx=6, pady=(0,6))
+
+    def _action_tutup(self):
+        try:
+            nomor_rekening = self._get_selected_rekening().nomor_rekening
+            tutup_rekening(nomor_rekening)
+        except Exception as e:
+            print(e)
+            messagebox.showerror("Admin Error", "Terjadi kesalahan tolong coba lagi!")
 
     def _set_status(self, text):
         self.status_var.set(text)
@@ -179,7 +188,7 @@ class AdminDashboardFrame(tk.Frame):
             messagebox.showwarning("Pilih rekening", "Pilih rekening terlebih dahulu pada daftar rekening.")
             return None
         text = self.acc_listbox.get(sel_idx)
-        no = text.split(' — ')[0]
+        no = text.split(' | ')[0]
         return self.rekening_map.get(no)
 
     def _action_deposit(self):

@@ -162,20 +162,15 @@ def buat_rekening_baru(nomor_telepon: str, jenis_rekening: JenisRekening):
         db.rollback()
         raise
 
-def tutup_nasabah(nomor_telepon: str | None = None, email: str | None = None):
+def tutup_rekening(nomor_rekening: str) -> Status:
     try:
-        if nomor_telepon:
-            query: str = 'UPDATE nasabah SET status_buka = false WHERE nomor_telepon = %s'
-            val: tuple = (nomor_telepon,)
+        query: str = 'UPDATE rekening SET status_buka = false WHERE nomor_rekening = %s'
+        val: tuple = (nomor_rekening,)
 
-            db.exec_query(query, val)
-            db.commit()
-        elif email:
-            query: str = 'UPDATE nasabah SET status_buka = false WHERE email = %s'
-            val: tuple = (email,)
+        db.exec_query(query, val)
+        db.commit()
 
-            db.exec_query(query, val)
-            db.commit()
+        return Status.SUCCESS
     except:
         db.rollback()
         raise
