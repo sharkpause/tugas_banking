@@ -67,4 +67,4 @@ class LoginPage(ttk.Frame):
         self.controller.current_user = result['object']
 
         messagebox.showinfo("Sukses", f"Selamat datang, {self.controller.current_user.nama}!")
-        self.controller.show_frame("DashboardPage")
+        self.controller.show_frame("PilihRekeningPage")

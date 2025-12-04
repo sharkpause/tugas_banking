@@ -1,19 +1,22 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from enum import IntEnum
+from datetime import datetime
+
+from database_interface.manager import fetch_riwayat_transaksi, fetch_aliran_uang
+from .utils.currency import indo
 
 class Row(IntEnum):
     TITLE = 0
-    NAMA = 10
-    NOMOR_REKENING = 20
-    SALDO = 30
+    NAMA = 1
+    NOMOR_REKENING = 2
+    SALDO = 3
+    BULAN_MASUK = 4
+    BULAN_KELUAR = 5
 
 class Column(IntEnum):
     TITLE = 0
     DATA = 1
-
-# Untuk mendapatkan saldo & rekening, kita cukup akses object nasabah
-# yang sudah disimpan saat login.
 
 class DashboardPage(ttk.Frame):
     def __init__(self, parent, controller):
@@ -46,6 +49,24 @@ class DashboardPage(ttk.Frame):
         self.label_saldo = ttk.Label(info, text='-', font=('Segoe UI', 12))
         self.label_saldo.grid(row=Row.SALDO, column=Column.DATA, sticky='w', padx=(15, 0))
 
+        ttk.Label(info, text='Income:', font=("Segoe UI", 12), foreground="#2ecc71").grid(
+            row=Row.BULAN_MASUK, column=Column.TITLE, sticky='w', pady=(15, 0)
+        )
+        self.label_bulan_masuk = ttk.Label(info, text="0", font=("Segoe UI", 12), foreground="#2ecc71")
+        self.label_bulan_masuk.grid(
+            row=Row.BULAN_MASUK, column=Column.DATA, sticky='w',
+            padx=(15, 0), pady=(15, 0)
+        )
+
+        ttk.Label(info, text='Expense:', font=("Segoe UI", 12), foreground="#e67e22").grid(
+            row=Row.BULAN_KELUAR, column=Column.TITLE, sticky='w'
+        )
+        self.label_bulan_keluar = ttk.Label(info, text="0", font=("Segoe UI", 12), foreground="#e67e22")
+        self.label_bulan_keluar.grid(
+            row=Row.BULAN_KELUAR, column=Column.DATA, sticky='w',
+            padx=(15, 0)
+        )
+
         # Tombol transfer
         ttk.Button(
             self,
@@ -75,12 +96,9 @@ class DashboardPage(ttk.Frame):
             width=25,
             command=lambda: (
                 controller.frames["RiwayatPage"].load_data(),
-                controller.show_frame("RiwayatPage")
+             controller.show_frame("RiwayatPage")
             )
         ).pack(pady=10)
-
-        # TODO: Tampilkan teks "Kemasukan bulan ini: {uang}" dan "Pengeluaran bulan ini: {uang}"
-
 
     def tkraise(self, *args, **kwargs):
         """Override tkraise supaya data user di-refresh setiap kali halaman muncul"""
@@ -90,9 +108,23 @@ class DashboardPage(ttk.Frame):
 
             self.label_nama.config(text=f"{user.nama}")
             self.label_nomor_rekening.config(text=f"{rekening.nomor_rekening}")
-            self.label_saldo.config(text=f"{rekening.jumlah_saldo}")
-        except:
-            pass
+
+            saldo_text = f'Rp{rekening.jumlah_saldo:,.2f}'
+            saldo_text = saldo_text.replace(',', '_').replace('.', ',').replace('_', '.')
+            self.label_saldo.config(text=saldo_text)
+
+            aliran_uang = fetch_aliran_uang(rekening.nomor_rekening)
+
+            current_month = datetime.now().strftime('%Y-%m')
+            current_month_flow = aliran_uang.get(current_month, {
+                'total_uang_masuk': 0,
+                'total_uang_keluar': 0
+            })
+
+            self.label_bulan_masuk.config(text=str(indo(current_month_flow['total_uang_masuk'])))
+            self.label_bulan_keluar.config(text=str(indo(current_month_flow['total_uang_keluar'])))
+        except Exception as e:
+            messagebox.showerror("Error", f"Terjadi kesalahan: {e}")
 
         super().tkraise(*args, **kwargs)
 

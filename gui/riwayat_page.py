@@ -1,8 +1,8 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-from database_interface.manager import fetch_riwayat_transaksi
-
+from database_interface.manager import fetch_aliran_uang, fetch_riwayat_transaksi
+from .utils.currency import indo
 
 class RiwayatPage(tk.Frame):
     def __init__(self, parent, controller):
@@ -35,7 +35,7 @@ class RiwayatPage(tk.Frame):
         )
         self.label_total_masuk.pack(pady=(5, 0))
 
-        self.label_total_keluar = tk.label(
+        self.label_total_keluar = tk.Label(
             self, text="Total Uang Keluar: -",font=("Arial", 12)
         )
         self.label_total_keluar.pack(pady=(0, 10))
@@ -86,27 +86,16 @@ class RiwayatPage(tk.Frame):
 
         # TODO: Tampilkan total uang keluar dan masuk untuk semua bulan
         
+        informasi_aliran = fetch_aliran_uang(rekening.nomor_rekening)
         total_masuk = 0
         total_keluar = 0
 
-        for t in riwayat:
-            # Transfer masuk ke rekening user
-            if t.nomor_rekening_tujuan == nomor_rekening:
-                total_masuk += t.jumlah_uang
 
-            # Transfer keluar dari rekening user
-            if t.nomor_rekening_sumber == nomor_rekening:
-                total_keluar += t.jumlah_uang
-
-            # Deposit
-            if t.jenis_transaksi.lower() == "deposit":
-                total_masuk += t.jumlah_uang
-            
-            # Withdraw
-            if t.jenis_transaksi.lower() == "withdraw":
-                total_keluar += t.jumlah_uang
-     
+        # Make for loop to iterate and add
+        for bulan, uang in informasi_aliran.items():
+            total_masuk += uang['total_uang_masuk']
+            total_keluar += uang['total_uang_keluar']
 
         # Tampilkan Total Di Label
-        self.label_total_masuk.config(text=f"Total Uang Masuk: {total_masuk}")
-        self.label_total_keluar.config(text=f"Total Uang Keluar: {total_keluar}")
+        self.label_total_masuk.config(text=f"Total income: {indo(total_masuk)}")
+        self.label_total_keluar.config(text=f"Total expense: {indo(total_keluar)}")

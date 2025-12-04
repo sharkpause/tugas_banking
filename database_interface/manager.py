@@ -191,8 +191,6 @@ def login_nasabah(nomor_telepon: str, password: str):
         nasabah = nomor_telepon_ke_Nasabah(nomor_telepon)
         result = nasabah._Nasabah__login(password)
 
-        nasabah.rekening = nomor_telepon_ke_Rekening(nasabah.nomor_telepon)
-        
         result['object'] = nasabah
         return result
     except:

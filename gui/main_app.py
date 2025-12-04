@@ -2,6 +2,7 @@ import tkinter as tk
 
 # Import semua halaman GUI
 from gui.login_page import LoginPage
+from gui.pilih_rekening_page import PilihRekeningPage
 from gui.register_page import RegisterPage
 from gui.dashboard_page import DashboardPage
 from gui.transfer_page import TransferPage
@@ -37,7 +38,8 @@ class App(tk.Tk):
             "TransferPage": TransferPage,
             "TransaksiPage": TransaksiPage,        # Deposit / Withdraw
             "RiwayatPage": RiwayatPage,
-            "AdminPage": AdminPage
+            "AdminPage": AdminPage,
+            "PilihRekeningPage": PilihRekeningPage
         }
 
         # Generate frame
