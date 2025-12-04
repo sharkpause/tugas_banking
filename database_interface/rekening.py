@@ -121,6 +121,10 @@ class Rekening:
     @property
     def id_pemilik(self) -> int:
         return self.__id_pemilik
+
+    @property
+    def jenis_rekening(self) -> int:
+        return self.__jenis_rekening
     
     def __save_to_database(self, changes: DataChanges):
         try:

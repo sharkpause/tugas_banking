@@ -73,17 +73,27 @@ class Nasabah:
 
         self.__id = None
 
+        jenis_rekening_map = {
+            'checking': JenisRekening.CHECKING,
+            'savings': JenisRekening.SAVINGS 
+        }
+
         self.rekening = []
 
         try:
-            query: str = 'SELECT r.id_nasabah, r.nomor_rekening, r.jumlah_saldo FROM rekening r JOIN nasabah n ON r.id_nasabah = n.id WHERE n.nomor_telepon=%s'
+            query: str = '''
+                SELECT r.id_nasabah, r.nomor_rekening, r.jumlah_saldo, r.jenis_rekening 
+                FROM rekening r JOIN nasabah n ON r.id_nasabah = n.id 
+                WHERE n.nomor_telepon=%s
+            '''
             val: tuple = (nomor_telepon,)
             
             result: list[tuple] = db.fetch(query, val)
 
             for row in result:
-                self.rekening: list[Rekening] = [Rekening(row[0], row[1], row[2])]
-        except:
+                self.rekening.append(Rekening(row[0], row[1], row[2], jenis_rekening_map[row[3]]))
+        except Exception as e:
+            print(e)
             self.rekening: list[Rekening] = []
 
     def __repr__(self) -> str:

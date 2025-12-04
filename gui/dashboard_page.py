@@ -4,6 +4,7 @@ from enum import IntEnum
 from datetime import datetime
 
 from database_interface.manager import fetch_riwayat_transaksi, fetch_aliran_uang
+from .utils.currency import indo
 
 class Row(IntEnum):
     TITLE = 0
@@ -112,7 +113,7 @@ class DashboardPage(ttk.Frame):
             saldo_text = saldo_text.replace(',', '_').replace('.', ',').replace('_', '.')
             self.label_saldo.config(text=saldo_text)
 
-            aliran_uang = fetch_aliran_uang(self.controller.current_user.rekening.nomor_rekening)
+            aliran_uang = fetch_aliran_uang(rekening.nomor_rekening)
 
             current_month = datetime.now().strftime('%Y-%m')
             current_month_flow = aliran_uang.get(current_month, {
@@ -120,16 +121,10 @@ class DashboardPage(ttk.Frame):
                 'total_uang_keluar': 0
             })
 
-            income_text = f'Rp{current_month_flow['total_uang_masuk']:,.2f}'
-            income_text = income_text.replace(',', '_').replace('.', ',').replace('_', '.')
-            
-            expense_text = f'Rp{current_month_flow['total_uang_keluar']:,.2f}'
-            expense_text = expense_text.replace(',', '_').replace('.', ',').replace('_', '.')
-
-            self.label_bulan_masuk.config(text=''.join(income_text))
-            self.label_bulan_keluar.config(text=''.join(expense_text))
-        except:
-            pass
+            self.label_bulan_masuk.config(text=str(indo(current_month_flow['total_uang_masuk'])))
+            self.label_bulan_keluar.config(text=str(indo(current_month_flow['total_uang_keluar'])))
+        except Exception as e:
+            messagebox.showerror("Error", f"Terjadi kesalahan: {e}")
 
         super().tkraise(*args, **kwargs)
 
