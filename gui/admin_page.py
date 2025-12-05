@@ -3,8 +3,15 @@ from datetime import datetime
 import tkinter as tk
 from tkinter import ttk
 
+import matplotlib
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
+from matplotlib.ticker import MaxNLocator, FuncFormatter
+
 from tkinter import messagebox, simpledialog
-from database_interface.manager import login_admin, fetch_semua_user, deposit, withdraw, transfer, fetch_riwayat_transaksi, tutup_rekening, buka_rekening
+from database_interface.manager import login_admin, fetch_semua_user, deposit, withdraw, transfer, fetch_riwayat_transaksi, tutup_rekening, buka_rekening, fetch_aliran_uang
+from .utils.currency import indo
 
 class AdminLoginFrame (tk.Frame) :
     def __init__ (self, master, on_success, controller) :
@@ -277,32 +284,83 @@ class AdminDashboardFrame(tk.Frame):
         if not no:
             messagebox.showerror("Error", "Nomor rekening tidak valid.")
             return
+
+        # --- Fetch transaction history ---
         try:
             rows = fetch_riwayat_transaksi(no)
         except Exception as e:
             messagebox.showerror("Error", f"Gagal mengambil riwayat: {e}")
             return
-        # show in simple window
+
+        # --- Fetch aliran uang ---
+        try:
+            informasi_aliran = fetch_aliran_uang(no)
+        except Exception as e:
+            messagebox.showerror("Error", f"Gagal mengambil aliran uang: {e}")
+            informasi_aliran = {}
+
         win = tk.Toplevel(self)
-        win.title(f"Riwayat - {no}")
+        win.title(f"Riwayat & Grafik - {no}")
+
         txt = tk.Text(win, width=80, height=20)
         txt.pack(fill='both', expand=True)
         if not rows:
-            txt.insert('end', 'Tidak ada riwayat.')
-            return
-        for r in rows:
-            # try to access attributes safely
-            try:
-                t = getattr(r, 'datetime_transaksi', getattr(r, 'datetime', ''))
-                jenis = getattr(r, 'jenis_transaksi', getattr(r, 'jenis', ''))
-                amt = getattr(r, 'jumlah_uang', getattr(r, 'amount', ''))
-                src = getattr(r, 'nomor_rekening_sumber', getattr(r, 'sumber', ''))
-                dst = getattr(r, 'nomor_rekening_tujuan', getattr(r, 'tujuan', ''))
-                line = f"{t} | {jenis} | {amt} | {src} -> {dst}\n"
-            except Exception:
-                line = repr(r) + "\n"
-            txt.insert('end', line)
+            txt.insert('end', 'Tidak ada riwayat.\n')
+        else:
+            for r in rows:
+                try:
+                    t = getattr(r, 'datetime_transaksi', getattr(r, 'datetime', ''))
+                    jenis = getattr(r, 'jenis_transaksi', getattr(r, 'jenis', ''))
+                    amt = getattr(r, 'jumlah_uang', getattr(r, 'amount', ''))
+                    src = getattr(r, 'nomor_rekening_sumber', getattr(r, 'sumber', ''))
+                    dst = getattr(r, 'nomor_rekening_tujuan', getattr(r, 'tujuan', ''))
+                    line = f"{t} | {jenis} | {amt} | {src} -> {dst}\n"
+                except Exception:
+                    line = repr(r) + "\n"
+                txt.insert('end', line)
 
+        total_masuk = sum(u['total_uang_masuk'] for u in informasi_aliran.values())
+        total_keluar = sum(u['total_uang_keluar'] for u in informasi_aliran.values())
+
+        label_total_masuk = tk.Label(win, text=f"Total income: {indo(total_masuk)}")
+        label_total_masuk.pack()
+        label_total_keluar = tk.Label(win, text=f"Total expense: {indo(total_keluar)}")
+        label_total_keluar.pack()
+
+        if informasi_aliran:
+            graph_frame = tk.Frame(win)
+            graph_frame.pack(fill='both', expand=True)
+
+            months = sorted(informasi_aliran.keys())
+            income = [informasi_aliran[m]['total_uang_masuk'] for m in months]
+            expense = [informasi_aliran[m]['total_uang_keluar'] for m in months]
+
+            figure = Figure(figsize=(14, 3), dpi=100)
+            axis = figure.add_subplot(1, 1, 1)
+
+            axis.plot(months, income, marker='o', label='Income', color='green')
+            axis.plot(months, expense, marker='o', label='Expense', color='red')
+
+            axis.set_title("Aliran Uang per Bulan")
+            axis.set_xlabel("Bulan")
+            axis.set_ylabel("Jumlah")
+
+            axis.legend()
+            axis.grid(True)
+
+            axis.yaxis.set_major_formatter(FuncFormatter(lambda x, pos: f"{int(x):,}"))
+            axis.xaxis.set_major_locator(MaxNLocator(nbins=15)) # 15 x axis points look nice here
+
+            figure.tight_layout()
+            figure.autofmt_xdate()
+
+            canvas = FigureCanvasTkAgg(figure, master=graph_frame)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill='both', expand=True)
+
+            toolbar = NavigationToolbar2Tk(canvas, graph_frame)
+            toolbar.update()
+            toolbar.pack(fill='x')
 
 class AdminPage(tk.Frame):
     def __init__(self, master, controller):
