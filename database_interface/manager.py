@@ -17,7 +17,7 @@ except:
     from .rekening import Rekening
     from .riwayat_transaksi import new_RT
     from .database import db
-    from .CustomClasses import JenisTransaksi, Status, StringJenisTransaksi, ErrorType, JenisRekening, StringJenisRekening
+    from .CustomClasses import JenisTransaksi, Status, StringJenisTransaksi, ErrorType, JenisRekening, StringJenisRekening, CredentialsError
     from .riwayat_transaksi import RiwayatTransaksi
 
     from .helper import nomor_telepon_ke_Nasabah, nomor_telepon_ke_Rekening
@@ -202,7 +202,11 @@ def login_nasabah(nomor_telepon: str, password: str):
         result['object'] = nasabah
         return result
     except:
-        raise
+        raise CredentialsError({
+            'status': Status.ERROR,
+            'type': ErrorType.CREDENTIALS,
+            'message': 'Nomor telepon atau password salah'
+        })
 
 def fetch_semua_user() -> list:
     '''
