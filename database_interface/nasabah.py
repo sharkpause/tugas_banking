@@ -97,7 +97,6 @@ class Nasabah:
                     status_buka = True
                 elif row[4] == 0:
                     status_buka = False
-                print(status_buka)
                 self.rekening.append(Rekening(
                     row[0],
                     row[1],

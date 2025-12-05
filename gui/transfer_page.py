@@ -38,7 +38,7 @@ class TransferPage(ttk.Frame):
 
     def do_transfer(self):
         user = self.controller.current_user
-        rekening_sumber = user.rekening  # rekening objek nasabah login
+        rekening_sumber = self.controller.selected_rekening # rekening objek nasabah login
 
         rek_tujuan_no = self.entry_rek_tujuan.get().strip()
         jumlah_str = self.entry_jumlah.get().strip()
@@ -59,6 +59,7 @@ class TransferPage(ttk.Frame):
             # ambil object rekening tujuan
             rekening_tujuan = nomor_rekening_ke_Rekening(rek_tujuan_no)
         except Exception as e:
+            print(e)
             messagebox.showerror("Error", f"Gagal menemukan rekening tujuan: {str(e)}")
             return
 
@@ -68,7 +69,7 @@ class TransferPage(ttk.Frame):
         try:
             transfer(jumlah, waktu, rekening_sumber, rekening_tujuan)
         except Exception as e:
-            messagebox.showerror("Gagal", str(e))
+            messagebox.showerror("Gagal", e.args[0]['message'])
             return
 
         messagebox.showinfo("Sukses", "Transfer berhasil!")

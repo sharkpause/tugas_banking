@@ -138,6 +138,7 @@ class DashboardPage(ttk.Frame):
 
         # Hapus user dari aplikasi
         self.controller.current_user = None
+        self.controller.selected_rekening = None
 
         # Bersihkan input login saat kembali ke halaman login
         login_page = self.controller.frames["LoginPage"]

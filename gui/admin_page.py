@@ -186,13 +186,11 @@ class AdminDashboardFrame(tk.Frame):
         self.acc_listbox.delete(0, 'end')
         if hasattr(nas, 'rekening') and nas.rekening:
             for r in nas.rekening:
-                print(r)
                 no = getattr(r, 'nomor_rekening', '<no>')
                 saldo = getattr(r, 'jumlah_saldo', 0)
                 jenis = getattr(r, 'jenis_rekening', 'checking')
                 status = getattr(r, 'status_buka', 'unknown')
 
-                print(r.status_buka)
                 if status == True:
                     status = 'buka'
                 elif status == False:
