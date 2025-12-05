@@ -48,3 +48,11 @@ class StringJenisTransaksi:
     DEPOSIT = 'deposit'
     WITHDRAW = 'withdraw'
     TRANSFER = 'transfer'
+
+class JenisRekening:
+    CHECKING = 0
+    SAVINGS = 1
+
+class StringJenisRekening:
+    CHECKING = 'checking'
+    SAVINGS = 'savings'

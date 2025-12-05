@@ -1,12 +1,29 @@
+from datetime import datetime
+
+import tkinter as tk
+from tkinter import ttk
+
+import matplotlib
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
+from matplotlib.ticker import MaxNLocator, FuncFormatter
+
+from tkinter import messagebox, simpledialog
+from database_interface.manager import login_admin, fetch_semua_user, deposit, withdraw, transfer, fetch_riwayat_transaksi, tutup_rekening, buka_rekening, fetch_aliran_uang
+from .utils.currency import indo
 
 class AdminLoginFrame (tk.Frame) :
-    def __init__ (self, master, on_success, args, kwargs) :
-        super ().__init__(master, args, kwargs)
+    def __init__ (self, master, on_success, controller) :
+        super ().__init__(master)
+
         self.on_success = on_success
+        self.controller = controller
+
         self._build()
 
     def _build (self):
-        lbl = tk.Label(self, text= "Admin Mode - Login", font=(None, 14, 'bold'))
+        lbl = tk.Label(self, text= "Admin Mode - Login", font=('Segoe UI', 14, 'bold'))
         lbl.pack(pady=8)
 
         frm = tk.Frame (self)
@@ -19,18 +36,15 @@ class AdminLoginFrame (tk.Frame) :
         btn_frame = tk.Frame(self)
         btn_frame.pack(pady=10)
         tk.Button(btn_frame, text="Login", command=self._try_login).pack(side='left', padx=6)
-        tk.Button(btn_frame, text="Back", command=lambda: self.master.show_main()).pack(side='left', padx=6)
+        tk.Button(btn_frame, text="Back", command=lambda: self.controller.show_frame('LoginPage')).pack(side='left', padx=6)
 
     def _try_login(self):
         token = self.token_var.get().strip()
         if not token:
             messagebox.showwarning("Token kosong", "Masukkan token admin terlebih dahulu")
             return
-        if manager is None:
-            messagebox.showerror 
-            return
         try:
-            res = manager.login_admin(token)
+            res = login_admin(token)
             # per spec, success returns 0
             if res == 0:
                 self.on_success()
@@ -56,9 +70,9 @@ class AdminDashboardFrame(tk.Frame):
     def _build(self):
         hdr = tk.Frame(self)
         hdr.pack(fill='x', pady=6)
-        tk.Label(hdr, text="Admin Dashboard", font=(None, 14, 'bold').pack(side='left', padx=6)
+        tk.Label(hdr, text="Admin Dashboard", font=(None, 14, 'bold')).pack(side='left', padx=6)
         tk.Button(hdr, text="Refresh", command=self._refresh_users).pack(side='right', padx=6)
-        tk.Button(hdr, text="Logout", command=lambda: self.master.show_login()).pack(side='right')
+        tk.Button(hdr, text="Logout", command=lambda: self.master.controller.show_frame('LoginPage')).pack(side='right')
 
         # Split left: user list, right: details
         body = tk.PanedWindow(self, orient='horizontal')
@@ -92,22 +106,36 @@ class AdminDashboardFrame(tk.Frame):
         tk.Button(action_fr, text="Withdraw", command=self._action_withdraw).pack(side='left', padx=4)
         tk.Button(action_fr, text="Transfer", command=self._action_transfer).pack(side='left', padx=4)
         tk.Button(action_fr, text="Riwayat Transaksi", command=self._action_riwayat).pack(side='left', padx=4)
+        tk.Button(action_fr, text="Tutup rekening", command=self._action_tutup).pack(side='left', padx=4)
+        tk.Button(action_fr, text="Buka rekening", command=self._action_buka).pack(side='left', padx=4)
 
         # status
         self.status_var = tk.StringVar(value='Siap')
         tk.Label(self, textvariable=self.status_var, anchor='w').pack(fill='x', padx=6, pady=(0,6))
+
+    def _action_tutup(self):
+        try:
+            nomor_rekening = self._get_selected_rekening().nomor_rekening
+            tutup_rekening(nomor_rekening)
+        except Exception as e:
+            print(e)
+            messagebox.showerror("Admin Error", "Terjadi kesalahan tolong coba lagi!")
+
+    def _action_buka(self):
+        try:
+            nomor_rekening = self._get_selected_rekening().nomor_rekening
+            buka_rekening(nomor_rekening)
+        except Exception as e:
+            print(e)
+            messagebox.showerror("Admin Error", "Terjadi kesalahan tolong coba lagi!")
 
     def _set_status(self, text):
         self.status_var.set(text)
 
     def _refresh_users(self):
         self._set_status('Mengambil daftar nasabah...')
-        if manager is None:
-            messagebox.showerror("Konfigurasi error", "database_interface.manager tidak ditemukan. Hubungi Abet.")
-            self._set_status('Error')
-            return
         try:
-            self.users = manager.fetch_semua_user()
+            self.users = fetch_semua_user()
         except Exception as e:
             messagebox.showerror("Fetch error", f"Gagal mengambil data nasabah: {e}")
             self._set_status('Error')
@@ -122,16 +150,21 @@ class AdminDashboardFrame(tk.Frame):
                 email = getattr(nasabah, 'email', '-')
                 telepon = getattr(nasabah, 'nomor_telepon', '-')
                 display = getattr(nasabah, 'nama', '<tanpa nama>')
-                uid = id(nasabah)
-                self.tree.insert('', 'end', iid=str(uid), values=(email, telepon), text=display)
-                # collect rekening
+                # Use nomor_telepon as persistent iid if available, otherwise fallback
+                uid = str(nasabah.nomor_telepon) if hasattr(nasabah, 'nomor_telepon') else str(id(nasabah))
+                
+                self.tree.insert('', 'end', iid=uid, values=(email, telepon), text=display)
+                
+                # collect rekening(s)
                 if hasattr(nasabah, 'rekening') and nasabah.rekening:
                     for r in nasabah.rekening:
                         no = getattr(r, 'nomor_rekening', None)
                         if no:
                             self.rekening_map[no] = r
-            except Exception:
+            except Exception as e:
+                print(f"Error processing nasabah {getattr(nasabah, 'nomor_telepon', '<unknown>')}: {e}")
                 continue
+    
         self._set_status(f'Ditemukan {len(self.users)} nasabah')
 
     def _on_user_select(self, event):
@@ -142,11 +175,12 @@ class AdminDashboardFrame(tk.Frame):
         # find nasabah by id
         nas = None
         for n in self.users:
-            if str(id(n)) == uid:
+            if str(n.nomor_telepon) == uid:
                 nas = n
                 break
         if nas is None:
             return
+
         # show details
         lines = []
         lines.append(f"Nama: {getattr(nas, 'nama', '-')}")
@@ -161,7 +195,15 @@ class AdminDashboardFrame(tk.Frame):
             for r in nas.rekening:
                 no = getattr(r, 'nomor_rekening', '<no>')
                 saldo = getattr(r, 'jumlah_saldo', 0)
-                self.acc_listbox.insert('end', f"{no} — Saldo: {saldo}")
+                jenis = getattr(r, 'jenis_rekening', 'checking')
+                status = getattr(r, 'status_buka', 'unknown')
+
+                if status == True:
+                    status = 'buka'
+                elif status == False:
+                    status = 'tutup'
+
+                self.acc_listbox.insert('end', f"{no} | {status} | {jenis} | Saldo: {saldo}")
 
     def _get_selected_rekening(self):
         sel_idx = self.acc_listbox.curselection()
@@ -169,7 +211,7 @@ class AdminDashboardFrame(tk.Frame):
             messagebox.showwarning("Pilih rekening", "Pilih rekening terlebih dahulu pada daftar rekening.")
             return None
         text = self.acc_listbox.get(sel_idx)
-        no = text.split(' — ')[0]
+        no = text.split(' | ')[0]
         return self.rekening_map.get(no)
 
     def _action_deposit(self):
@@ -181,7 +223,7 @@ class AdminDashboardFrame(tk.Frame):
             return
         dt = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         try:
-            tid = manager.deposit(amt, dt, rek)
+            tid = deposit(amt, dt, rek)
             messagebox.showinfo("Sukses", f"Deposit berhasil. ID transaksi: {tid}")
             self._refresh_users()
         except Exception as e:
@@ -196,7 +238,7 @@ class AdminDashboardFrame(tk.Frame):
             return
         dt = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         try:
-            res = manager.withdraw(amt, dt, rek)
+            res = withdraw(amt, dt, rek)
             # per spec return Status.SUCCESS | Status.ERROR or RiwayatTransaksi ID
             if isinstance(res, int):
                 messagebox.showinfo("Sukses", f"Withdraw berhasil. ID: {res}")
@@ -228,7 +270,7 @@ class AdminDashboardFrame(tk.Frame):
             return
         dt = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         try:
-            tid = manager.transfer(amt, dt, src, tgt)
+            tid = transfer(amt, dt, src, tgt)
             messagebox.showinfo("Sukses", f"Transfer berhasil. ID transaksi: {tid}")
             self._refresh_users()
         except Exception as e:
@@ -242,38 +284,94 @@ class AdminDashboardFrame(tk.Frame):
         if not no:
             messagebox.showerror("Error", "Nomor rekening tidak valid.")
             return
+
+        # --- Fetch transaction history ---
         try:
-            rows = manager.fetch_riwayat_transaksi(no)
+            rows = fetch_riwayat_transaksi(no)
         except Exception as e:
             messagebox.showerror("Error", f"Gagal mengambil riwayat: {e}")
             return
-        # show in simple window
+
+        # --- Fetch aliran uang ---
+        try:
+            informasi_aliran = fetch_aliran_uang(no)
+        except Exception as e:
+            messagebox.showerror("Error", f"Gagal mengambil aliran uang: {e}")
+            informasi_aliran = {}
+
         win = tk.Toplevel(self)
-        win.title(f"Riwayat - {no}")
+        win.title(f"Riwayat & Grafik - {no}")
+
         txt = tk.Text(win, width=80, height=20)
         txt.pack(fill='both', expand=True)
         if not rows:
-            txt.insert('end', 'Tidak ada riwayat.')
-            return
-        for r in rows:
-            # try to access attributes safely
-            try:
-                t = getattr(r, 'datetime_transaksi', getattr(r, 'datetime', ''))
-                jenis = getattr(r, 'jenis_transaksi', getattr(r, 'jenis', ''))
-                amt = getattr(r, 'jumlah_uang', getattr(r, 'amount', ''))
-                src = getattr(r, 'nomor_rekening_sumber', getattr(r, 'sumber', ''))
-                dst = getattr(r, 'nomor_rekening_tujuan', getattr(r, 'tujuan', ''))
-                line = f"{t} | {jenis} | {amt} | {src} -> {dst}\n"
-            except Exception:
-                line = repr(r) + "\n"
-            txt.insert('end', line)
+            txt.insert('end', 'Tidak ada riwayat.\n')
+        else:
+            for r in rows:
+                try:
+                    t = getattr(r, 'datetime_transaksi', getattr(r, 'datetime', ''))
+                    jenis = getattr(r, 'jenis_transaksi', getattr(r, 'jenis', ''))
+                    amt = getattr(r, 'jumlah_uang', getattr(r, 'amount', ''))
+                    src = getattr(r, 'nomor_rekening_sumber', getattr(r, 'sumber', ''))
+                    dst = getattr(r, 'nomor_rekening_tujuan', getattr(r, 'tujuan', ''))
+                    line = f"{t} | {jenis} | {amt} | {src} -> {dst}\n"
+                except Exception:
+                    line = repr(r) + "\n"
+                txt.insert('end', line)
 
+        total_masuk = sum(u['total_uang_masuk'] for u in informasi_aliran.values())
+        total_keluar = sum(u['total_uang_keluar'] for u in informasi_aliran.values())
 
-class AdminPanel(tk.Frame):
-    def __init__(self, master, *args, **kwargs):
-        super().__init__(master, *args, **kwargs)
-        self.pack(fill='both', expand=True)
-        self.login_frame = AdminLoginFrame(self, on_success=self._show_dashboard)
+        label_total_masuk = tk.Label(win, text=f"Total income: {indo(total_masuk)}")
+        label_total_masuk.pack()
+        label_total_keluar = tk.Label(win, text=f"Total expense: {indo(total_keluar)}")
+        label_total_keluar.pack()
+
+        if informasi_aliran:
+            graph_frame = tk.Frame(win)
+            graph_frame.pack(fill='both', expand=True)
+
+            months = sorted(informasi_aliran.keys())
+            income = [informasi_aliran[m]['total_uang_masuk'] for m in months]
+            expense = [informasi_aliran[m]['total_uang_keluar'] for m in months]
+
+            figure = Figure(figsize=(14, 3), dpi=100)
+            axis = figure.add_subplot(1, 1, 1)
+
+            axis.plot(months, income, marker='o', label='Income', color='green')
+            axis.plot(months, expense, marker='o', label='Expense', color='red')
+
+            axis.set_title("Aliran Uang per Bulan")
+            axis.set_xlabel("Bulan")
+            axis.set_ylabel("Jumlah")
+
+            axis.legend()
+            axis.grid(True)
+
+            axis.yaxis.set_major_formatter(FuncFormatter(lambda x, pos: f"{int(x):,}"))
+            axis.xaxis.set_major_locator(MaxNLocator(nbins=15)) # 15 x axis points look nice here
+
+            figure.tight_layout()
+            figure.autofmt_xdate()
+
+            canvas = FigureCanvasTkAgg(figure, master=graph_frame)
+            canvas.draw()
+            canvas.get_tk_widget().pack(fill='both', expand=True)
+
+            toolbar = NavigationToolbar2Tk(canvas, graph_frame)
+            toolbar.update()
+            toolbar.pack(fill='x')
+
+class AdminPage(tk.Frame):
+    def __init__(self, master, controller):
+        super().__init__(master)
+
+        self.controller = controller
+
+        self.frame = ttk.Frame(self)
+
+        self.frame.pack(fill='both', expand=True)
+        self.login_frame = AdminLoginFrame(self, on_success=self._show_dashboard, controller=controller)
         self.dashboard = AdminDashboardFrame(self)
         self.login_frame.pack(fill='both', expand=True)
 
@@ -286,8 +384,5 @@ class AdminPanel(tk.Frame):
         self.login_frame.pack(fill='both', expand=True)
 
     def show_main(self):
-        # convenience - in case integrated in main app
-        self.master.show_main()
-
-
+        self.controller.show_frame('LoginPage')
 

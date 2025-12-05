@@ -35,6 +35,10 @@ class LoginPage(ttk.Frame):
             command=lambda: controller.show_frame("RegisterPage")
         ).pack()
 
+        ttk.Button(controller, text="Login sebagai admin", bootstyle='dark',
+            command=lambda: controller.show_frame("AdminPage")
+        ).place(relx=1.0, y=15, x=-15, anchor='ne')
+
     def toggle_password(self):
         if self.showing:
             self.showing = False
@@ -56,11 +60,11 @@ class LoginPage(ttk.Frame):
         try:
             result = login_nasabah(phone, password)   # <- panggil helper Abet
         except Exception as e:
-            messagebox.showerror("Login gagal", str(e))
+            messagebox.showerror("Login gagal", e.args[0]['message'])
             return
 
         # Simpan object nasabah ke controller agar bisa dipakai halaman lain
         self.controller.current_user = result['object']
 
         messagebox.showinfo("Sukses", f"Selamat datang, {self.controller.current_user.nama}!")
-        self.controller.show_frame("DashboardPage")
+        self.controller.show_frame("PilihRekeningPage")

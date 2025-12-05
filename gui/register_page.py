@@ -69,15 +69,15 @@ class RegisterPage(ttk.Frame):
                 nomor_telepon=phone,
                 alamat=alamat
             )
+            messagebox.showinfo("Sukses", "Akun berhasil dibuat. Silakan login.")
+            self.controller.show_frame("LoginPage")
         except ValidationError as e:
             fields = e.errors['errors']
             msg = ''
 
             for field in fields:
                 msg += field['message'] + '\n'
+            messagebox.showerror("Gagal", msg)
         except Exception as e:
             messagebox.showerror("Gagal", str(e))
             return
-
-        messagebox.showinfo("Sukses", "Akun berhasil dibuat. Silakan login.")
-        self.controller.show_frame("LoginPage")
