@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from datetime import datetime
 
-# Import fungsi helper sesuai aturan Abet
 from database_interface.manager import transfer
 from database_interface.helper import nomor_rekening_ke_Rekening
 
@@ -18,20 +17,16 @@ class TransferPage(ttk.Frame):
         form = ttk.Frame(self)
         form.pack(pady=10)
 
-        # Nomor rekening tujuan
         ttk.Label(form, text="Nomor Rekening Tujuan:").grid(row=0, column=0, sticky="w", pady=5)
         self.entry_rek_tujuan = ttk.Entry(form, width=30)
         self.entry_rek_tujuan.grid(row=0, column=1, pady=5)
 
-        # Jumlah uang
         ttk.Label(form, text="Jumlah Uang:").grid(row=1, column=0, sticky="w", pady=5)
         self.entry_jumlah = ttk.Entry(form, width=30)
         self.entry_jumlah.grid(row=1, column=1, pady=5)
 
-        # Tombol submit
         ttk.Button(self, text="Kirim", command=self.do_transfer).pack(pady=15)
 
-        # Tombol kembali
         ttk.Button(self, text="Kembali ke Dashboard",
                    command=lambda: controller.show_frame("DashboardPage")
                    ).pack()
@@ -56,14 +51,12 @@ class TransferPage(ttk.Frame):
             return
 
         try:
-            # ambil object rekening tujuan
             rekening_tujuan = nomor_rekening_ke_Rekening(rek_tujuan_no)
         except Exception as e:
             print(e)
             messagebox.showerror("Error", f"Gagal menemukan rekening tujuan: {str(e)}")
             return
 
-        # Format waktu sesuai docstring Abet
         waktu = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         try:
@@ -74,9 +67,7 @@ class TransferPage(ttk.Frame):
 
         messagebox.showinfo("Sukses", "Transfer berhasil!")
 
-        # Clear input
         self.entry_rek_tujuan.delete(0, tk.END)
         self.entry_jumlah.delete(0, tk.END)
 
-        # Kembali ke dashboard
         self.controller.show_frame("DashboardPage")
