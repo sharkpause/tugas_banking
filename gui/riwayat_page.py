@@ -70,7 +70,6 @@ class RiwayatPage(tk.Frame):
         for row in self.tree.get_children():
             self.tree.delete(row)
 
-        # Masukkan data baru
         for t in riwayat:
             self.tree.insert(
                 "",
@@ -90,23 +89,18 @@ class RiwayatPage(tk.Frame):
         total_keluar = 0
 
         for t in riwayat:
-            # Transfer masuk ke rekening user
+            
             if t.nomor_rekening_tujuan == nomor_rekening:
                 total_masuk += t.jumlah_uang
 
-            # Transfer keluar dari rekening user
             if t.nomor_rekening_sumber == nomor_rekening:
                 total_keluar += t.jumlah_uang
 
-            # Deposit
             if t.jenis_transaksi.lower() == "deposit":
                 total_masuk += t.jumlah_uang
-            
-            # Withdraw
+
             if t.jenis_transaksi.lower() == "withdraw":
                 total_keluar += t.jumlah_uang
      
-
-        # Tampilkan Total Di Label
         self.label_total_masuk.config(text=f"Total Uang Masuk: {total_masuk}")
         self.label_total_keluar.config(text=f"Total Uang Keluar: {total_keluar}")
