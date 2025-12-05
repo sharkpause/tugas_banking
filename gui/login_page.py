@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-# Import fungsi login dari database_interface (aman sesuai aturan)
 from database_interface.manager import login_nasabah
 
 class LoginPage(ttk.Frame):
@@ -9,7 +8,6 @@ class LoginPage(ttk.Frame):
         super().__init__(parent)
         self.controller = controller
 
-        # Judul
         title = ttk.Label(self, text="Login Nasabah", font=("Segoe UI", 18, "bold"))
         title.pack(pady=20)
 
@@ -58,12 +56,11 @@ class LoginPage(ttk.Frame):
             return
 
         try:
-            result = login_nasabah(phone, password)   # <- panggil helper Abet
+            result = login_nasabah(phone, password)  
         except Exception as e:
             messagebox.showerror("Login gagal", e.args[0]['message'])
             return
 
-        # Simpan object nasabah ke controller agar bisa dipakai halaman lain
         self.controller.current_user = result['object']
 
         messagebox.showinfo("Sukses", f"Selamat datang, {self.controller.current_user.nama}!")
