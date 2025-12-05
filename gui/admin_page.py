@@ -10,7 +10,8 @@ from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 from matplotlib.ticker import MaxNLocator, FuncFormatter
 
 from tkinter import messagebox, simpledialog
-from database_interface.manager import login_admin, fetch_semua_user, deposit, withdraw, transfer, fetch_riwayat_transaksi, tutup_rekening, buka_rekening, fetch_aliran_uang
+from database_interface.CustomClasses import JenisRekening
+from database_interface.manager import login_admin, fetch_semua_user, deposit, withdraw, transfer, fetch_riwayat_transaksi, tutup_rekening, buka_rekening, fetch_aliran_uang, buat_rekening_baru
 from .utils.currency import indo
 
 class AdminLoginFrame (tk.Frame) :
@@ -108,10 +109,41 @@ class AdminDashboardFrame(tk.Frame):
         tk.Button(action_fr, text="Riwayat Transaksi", command=self._action_riwayat).pack(side='left', padx=4)
         tk.Button(action_fr, text="Tutup rekening", command=self._action_tutup).pack(side='left', padx=4)
         tk.Button(action_fr, text="Buka rekening", command=self._action_buka).pack(side='left', padx=4)
+        tk.Button(action_fr, text="Buat rekening baru", command=self._popup_rekening_baru).pack(side='left', padx=4)
 
         # status
         self.status_var = tk.StringVar(value='Siap')
         tk.Label(self, textvariable=self.status_var, anchor='w').pack(fill='x', padx=6, pady=(0,6))
+
+    def _popup_rekening_baru(self):
+        if self.selected_nasabah is None:
+            return
+        
+        popup = tk.Toplevel(self.master)
+        popup.title("Pilih Jenis Rekening")
+        popup.geometry("300x100")
+        popup.transient(self.master)
+        popup.grab_set()
+
+        popup.protocol("WM_DELETE_WINDOW", lambda: None)
+
+        def pilih_rekening(nomor_telepon: str, jenis_rekening: JenisRekening):
+            self._action_buka_rekening_baru(nomor_telepon, jenis_rekening)
+            popup.destroy()
+
+        tk.Label(popup, text="Pilih jenis rekening:").pack(pady=5)
+
+        nomor_telepon_user = self.selected_nasabah.nomor_telepon
+        tk.Button(popup, text="Rekening Savings", command=lambda: pilih_rekening(nomor_telepon_user, JenisRekening.SAVINGS)).pack(side='left', padx=10)
+        tk.Button(popup, text="Rekening Checking", command=lambda: pilih_rekening(nomor_telepon_user, JenisRekening.CHECKING)).pack(side='left', padx=10)
+
+    def _action_buka_rekening_baru(self, nomor_telepon: str, jenis_rekening: JenisRekening):
+        try:
+            buat_rekening_baru(nomor_telepon, jenis_rekening)
+        except Exception as e:
+            print(e)
+            messagebox.showerror('Admin error', 'Terjadi kesalahan')
+
 
     def _action_tutup(self):
         try:
@@ -180,6 +212,8 @@ class AdminDashboardFrame(tk.Frame):
                 break
         if nas is None:
             return
+        
+        self.selected_nasabah = nas
 
         # show details
         lines = []
