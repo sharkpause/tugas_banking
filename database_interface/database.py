@@ -17,10 +17,19 @@ class Database:
     NOT_NULL_ERRNO = 1048
 
     def __init__(self):
+        # Config for Abet's Linux machine
+       # self.db = mysql_conn.connect(
+       #     host = 'localhost',
+       #     user = 'banking',
+       #     password = 'password',
+       #     database = 'banking'
+       # )
+
+        # Laragon defaults probably
         self.db = mysql_conn.connect(
             host = 'localhost',
-            user = 'banking',
-            password = 'password',
+            user = 'root',
+            password = '',
             database = 'banking'
         )
 
