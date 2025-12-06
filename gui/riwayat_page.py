@@ -19,7 +19,6 @@ class RiwayatPage(tk.Frame):
 
         tk.Label(self, text="Riwayat Transaksi", font=("Arial", 20, "bold")).pack(pady=10)
 
-        # Treeview untuk menampilkan tabel transaksi
         columns = ("tanggal", "jenis", "jumlah", "sumber", "tujuan")
 
         self.tree = ttk.Treeview(self, columns=columns, show="headings", height=12)
@@ -37,7 +36,6 @@ class RiwayatPage(tk.Frame):
 
         self.tree.pack(padx=20, pady=10)
 
-        # Label total masuk dan keluat
         self.label_total_masuk = tk.Label(
             self, text="Total Uang Masuk: -", font=("Arial", 12)  
         )
@@ -49,7 +47,6 @@ class RiwayatPage(tk.Frame):
         self.label_total_keluar.pack(pady=(0, 10))
 
 
-        # Tombol kembali
         ttk.Button(
             self,
             text="Kembali ke Dashboard",
@@ -69,18 +66,15 @@ class RiwayatPage(tk.Frame):
 
         nomor_rekening = rekening.nomor_rekening
 
-        # Ambil riwayat transaksi
         try:
             riwayat = fetch_riwayat_transaksi(nomor_rekening)
         except Exception as e:
             messagebox.showerror("Error", f"Gagal mengambil riwayat transaksi:\n{e}")
             return
 
-        # Hapus isi tabel sebelumnya
         for row in self.tree.get_children():
             self.tree.delete(row)
 
-        # Masukkan data baru
         for t in riwayat:
             self.tree.insert(
                 "",

@@ -20,20 +20,17 @@ class TransaksiPage(ttk.Frame):
         self.entry_jumlah = ttk.Entry(form, width=30)
         self.entry_jumlah.grid(row=0, column=1, pady=10)
 
-        # Tombol Deposit dan Withdraw
         btn_frame = ttk.Frame(self)
         btn_frame.pack(pady=10)
 
         ttk.Button(btn_frame, text="Deposit", width=15, command=self.do_deposit).grid(row=0, column=0, padx=10)
         ttk.Button(btn_frame, text="Withdraw", width=15, command=self.do_withdraw).grid(row=0, column=1, padx=10)
 
-        # Kembali ke Dashboard
         ttk.Button(self, text="Kembali ke Dashboard",
                    command=lambda: controller.show_frame("DashboardPage")
                    ).pack(pady=15)
 
     def get_amount(self):
-        """Helper untuk mengambil input jumlah dengan validasi."""
         jumlah_str = self.entry_jumlah.get().strip()
         if not jumlah_str:
             messagebox.showerror("Error", "Jumlah uang tidak boleh kosong")

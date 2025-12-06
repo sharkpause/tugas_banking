@@ -3,7 +3,7 @@ from tkinter import ttk, messagebox
 from enum import IntEnum
 from datetime import datetime
 
-from database_interface.manager import fetch_riwayat_transaksi, fetch_aliran_uang
+from database_interface.manager import fetch_aliran_uang
 from .utils.currency import indo
 
 class Row(IntEnum):
@@ -67,7 +67,6 @@ class DashboardPage(ttk.Frame):
             padx=(15, 0)
         )
 
-        # Tombol transfer
         ttk.Button(
             self,
             text="Transfer",
@@ -75,7 +74,6 @@ class DashboardPage(ttk.Frame):
             command=lambda: controller.show_frame("TransferPage")
         ).pack(pady=10)
 
-        # Tombol Deposit & Withdraw
         ttk.Button(
             self,
             text="Deposit / Withdraw",
@@ -89,7 +87,6 @@ class DashboardPage(ttk.Frame):
             command=self.pilih_rekening_lain
         ).pack(pady=10)
 
-        # Tombol logout
         ttk.Button(
             self,
             text="Logout", width=25,
@@ -114,7 +111,7 @@ class DashboardPage(ttk.Frame):
     def tkraise(self, *args, **kwargs):
         try:
             user = self.controller.current_user
-            rekening = self.controller.selected_rekening  # langsung dapat object rekening
+            rekening = self.controller.selected_rekening
 
             self.label_nama.config(text=f"{user.nama}")
             self.label_nomor_rekening.config(text=f"{rekening.nomor_rekening}")
@@ -147,11 +144,9 @@ class DashboardPage(ttk.Frame):
         if not confirm:
             return
 
-        # Hapus user dari aplikasi
         self.controller.current_user = None
         self.controller.selected_rekening = None
 
-        # Bersihkan input login saat kembali ke halaman login
         login_page = self.controller.frames["LoginPage"]
         login_page.entry_phone.delete(0, tk.END)
         login_page.entry_password.delete(0, tk.END)
