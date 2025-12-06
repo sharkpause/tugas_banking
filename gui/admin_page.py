@@ -15,24 +15,24 @@ from database_interface.manager import login_admin, fetch_semua_user, deposit, w
 from .utils.currency import indo
 
 class AdminLoginFrame (tk.Frame) :
-    def __init__ (self, master, on_success, controller) :
-        super ().__init__(master)
+    def __init__(self, master, on_success, controller) :
+        super().__init__(master)
 
         self.on_success = on_success
         self.controller = controller
 
         self._build()
 
-    def _build (self):
-        lbl = tk.Label(self, text= "Admin Mode - Login", font=('Segoe UI', 14, 'bold'))
-        lbl.pack(pady=8)
+    def _build(self):
+        label = tk.Label(self, text= "Admin Mode - Login", font=('Segoe UI', 14, 'bold'))
+        label.pack(pady=8)
 
-        frm = tk.Frame (self)
-        frm.pack (pady=4)
+        frame = tk.Frame(self)
+        frame.pack(pady=4)
 
-        tk.Label(frm, text="Admin Token:").grid(row=0, column=0, sticky='e')
+        tk.Label(frame, text="Admin Token:").grid(row=0, column=0, sticky='e')
         self.token_var = tk.StringVar()
-        tk.Entry(frm, textvariable=self.token_var, width=40, show='*').grid(row=0, column=1, padx=6)
+        tk.Entry(frame, textvariable=self.token_var, width=40, show='*').grid(row=0, column=1, padx=6)
 
         btn_frame = tk.Frame(self)
         btn_frame.pack(pady=10)
@@ -46,13 +46,11 @@ class AdminLoginFrame (tk.Frame) :
             return
         try:
             res = login_admin(token)
-            # per spec, success returns 0
             if res == 0:
                 self.on_success()
             else:
                 messagebox.showerror("Login gagal", f"Respon tidak dikenal: {res}")
         except Exception as e:
-            # manager raises CredentialsError with payload per spec
             try:
                 msg = e.args[0]
             except Exception:
@@ -63,8 +61,8 @@ class AdminLoginFrame (tk.Frame) :
 class AdminDashboardFrame(tk.Frame):
     def __init__(self, master, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
-        self.users = []  # list of Nasabah objects
-        self.rekening_map = {}  # nomor_rekening -> Rekening object
+        self.users = []
+        self.rekening_map = {}  # nomor_rekening: Rekening object
         self._build()
         self._refresh_users()
 
@@ -75,11 +73,9 @@ class AdminDashboardFrame(tk.Frame):
         tk.Button(hdr, text="Refresh", command=self._refresh_users).pack(side='right', padx=6)
         tk.Button(hdr, text="Logout", command=lambda: self.master.controller.show_frame('LoginPage')).pack(side='right')
 
-        # Split left: user list, right: details
         body = tk.PanedWindow(self, orient='horizontal')
         body.pack(fill='both', expand=True, padx=6, pady=6)
 
-        # Left: user tree
         left = tk.Frame(body)
         body.add(left, width=420)
         self.tree = ttk.Treeview(left, columns=("email", "telepon"), show='headings', selectmode='browse')
@@ -88,19 +84,16 @@ class AdminDashboardFrame(tk.Frame):
         self.tree.pack(fill='both', expand=True, side='top')
         self.tree.bind('<<TreeviewSelect>>', self._on_user_select)
 
-        # Right: user details and actions
         right = tk.Frame(body)
         body.add(right)
 
-        self.detail_lbl = tk.Label(right, text="Pilih user untuk lihat detail", justify='left')
-        self.detail_lbl.pack(anchor='nw')
+        self.detail_label = tk.Label(right, text="Pilih user untuk lihat detail", justify='left')
+        self.detail_label.pack(anchor='nw')
 
-        # Accounts list
         tk.Label(right, text="Rekening:").pack(anchor='nw', pady=(8,0))
         self.acc_listbox = tk.Listbox(right, height=6)
         self.acc_listbox.pack(fill='x')
 
-        # Action buttons
         action_fr = tk.Frame(right)
         action_fr.pack(fill='x', pady=8)
         tk.Button(action_fr, text="Deposit", command=self._action_deposit).pack(side='left', padx=4)
@@ -111,7 +104,6 @@ class AdminDashboardFrame(tk.Frame):
         tk.Button(action_fr, text="Buka rekening", command=self._action_buka).pack(side='left', padx=4)
         tk.Button(action_fr, text="Buat rekening baru", command=self._popup_rekening_baru).pack(side='left', padx=4)
 
-        # status
         self.status_var = tk.StringVar(value='Siap')
         tk.Label(self, textvariable=self.status_var, anchor='w').pack(fill='x', padx=6, pady=(0,6))
 
@@ -134,8 +126,10 @@ class AdminDashboardFrame(tk.Frame):
         tk.Label(popup, text="Pilih jenis rekening:").pack(pady=5)
 
         nomor_telepon_user = self.selected_nasabah.nomor_telepon
-        tk.Button(popup, text="Rekening Savings", command=lambda: pilih_rekening(nomor_telepon_user, JenisRekening.SAVINGS)).pack(side='left', padx=10)
-        tk.Button(popup, text="Rekening Checking", command=lambda: pilih_rekening(nomor_telepon_user, JenisRekening.CHECKING)).pack(side='left', padx=10)
+        tk.Button(popup, text="Rekening Savings",
+                  command=lambda: pilih_rekening(nomor_telepon_user, JenisRekening.SAVINGS)).pack(side='left', padx=10)
+        tk.Button(popup, text="Rekening Checking",
+                  command=lambda: pilih_rekening(nomor_telepon_user, JenisRekening.CHECKING)).pack(side='left', padx=10)
 
     def _action_buka_rekening_baru(self, nomor_telepon: str, jenis_rekening: JenisRekening):
         try:
@@ -173,7 +167,6 @@ class AdminDashboardFrame(tk.Frame):
             self._set_status('Error')
             return
 
-        # populate treeview
         for i in self.tree.get_children():
             self.tree.delete(i)
         self.rekening_map.clear()
@@ -182,12 +175,11 @@ class AdminDashboardFrame(tk.Frame):
                 email = getattr(nasabah, 'email', '-')
                 telepon = getattr(nasabah, 'nomor_telepon', '-')
                 display = getattr(nasabah, 'nama', '<tanpa nama>')
-                # Use nomor_telepon as persistent iid if available, otherwise fallback
+
                 uid = str(nasabah.nomor_telepon) if hasattr(nasabah, 'nomor_telepon') else str(id(nasabah))
                 
                 self.tree.insert('', 'end', iid=uid, values=(email, telepon), text=display)
                 
-                # collect rekening(s)
                 if hasattr(nasabah, 'rekening') and nasabah.rekening:
                     for r in nasabah.rekening:
                         no = getattr(r, 'nomor_rekening', None)
@@ -204,7 +196,7 @@ class AdminDashboardFrame(tk.Frame):
         if not sel:
             return
         uid = sel[0]
-        # find nasabah by id
+        
         nas = None
         for n in self.users:
             if str(n.nomor_telepon) == uid:
@@ -215,15 +207,13 @@ class AdminDashboardFrame(tk.Frame):
         
         self.selected_nasabah = nas
 
-        # show details
         lines = []
         lines.append(f"Nama: {getattr(nas, 'nama', '-')}")
         lines.append(f"Email: {getattr(nas, 'email', '-')}")
         lines.append(f"Telepon: {getattr(nas, 'nomor_telepon', '-')}")
         lines.append(f"Alamat: {getattr(nas, 'alamat', '-')}")
-        self.detail_lbl.config(text='\n'.join(lines))
+        self.detail_label.config(text='\n'.join(lines))
 
-        # populate rekening listbox
         self.acc_listbox.delete(0, 'end')
         if hasattr(nas, 'rekening') and nas.rekening:
             for r in nas.rekening:
@@ -273,7 +263,6 @@ class AdminDashboardFrame(tk.Frame):
         dt = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         try:
             res = withdraw(amt, dt, rek)
-            # per spec return Status.SUCCESS | Status.ERROR or RiwayatTransaksi ID
             if isinstance(res, int):
                 messagebox.showinfo("Sukses", f"Withdraw berhasil. ID: {res}")
             else:
@@ -286,7 +275,6 @@ class AdminDashboardFrame(tk.Frame):
         src = self._get_selected_rekening()
         if not src:
             return
-        # build list of possible target rekening numbers
         choices = list(self.rekening_map.keys())
         if not choices:
             messagebox.showwarning("Tidak ada rekening target", "Tidak ada rekening tersedia sebagai target.")
@@ -319,14 +307,12 @@ class AdminDashboardFrame(tk.Frame):
             messagebox.showerror("Error", "Nomor rekening tidak valid.")
             return
 
-        # --- Fetch transaction history ---
         try:
             rows = fetch_riwayat_transaksi(no)
         except Exception as e:
             messagebox.showerror("Error", f"Gagal mengambil riwayat: {e}")
             return
 
-        # --- Fetch aliran uang ---
         try:
             informasi_aliran = fetch_aliran_uang(no)
         except Exception as e:

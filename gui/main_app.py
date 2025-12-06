@@ -1,6 +1,5 @@
 import tkinter as tk
 
-# Import semua halaman GUI
 from gui.login_page import LoginPage
 from gui.pilih_rekening_page import PilihRekeningPage
 from gui.register_page import RegisterPage
@@ -21,7 +20,6 @@ class App(tk.Tk):
 
         self.style = Style(theme='superhero')
 
-        # Variable global untuk user yang sedang login
         self.current_user = None
         self.current_rekening = None
 
@@ -30,31 +28,27 @@ class App(tk.Tk):
 
         self.frames = {}
 
-        # Daftar semua halaman GUI
         pages = {
             "LoginPage": LoginPage,
             "RegisterPage": RegisterPage,
             "DashboardPage": DashboardPage,
             "TransferPage": TransferPage,
-            "TransaksiPage": TransaksiPage,        # Deposit / Withdraw
+            "TransaksiPage": TransaksiPage,
             "RiwayatPage": RiwayatPage,
             "AdminPage": AdminPage,
             "PilihRekeningPage": PilihRekeningPage
         }
 
-        # Generate frame
         for page_name, PageClass in pages.items():
             frame = PageClass(container, self)
             self.frames[page_name] = frame
             frame.grid(row=0, column=0, sticky="nsew")
 
-        # Tampilkan halaman login pertama kali
         self.show_frame("LoginPage")
 
     def show_frame(self, page_name):
         frame = self.frames[page_name]
 
-        # Jika halaman punya fungsi refresh/load_data, panggil otomatis
         if hasattr(frame, "load_data"):
             frame.load_data()
 
