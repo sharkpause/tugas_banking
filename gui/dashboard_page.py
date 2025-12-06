@@ -83,6 +83,12 @@ class DashboardPage(ttk.Frame):
             command=lambda: controller.show_frame("TransaksiPage")
         ).pack(pady=10)
 
+        ttk.Button(
+            self,
+            text="Pilih rekening lain", width=25,
+            command=self.pilih_rekening_lain
+        ).pack(pady=10)
+
         # Tombol logout
         ttk.Button(
             self,
@@ -99,6 +105,11 @@ class DashboardPage(ttk.Frame):
              controller.show_frame("RiwayatPage")
             )
         ).pack(pady=10)
+
+    def pilih_rekening_lain(self):
+        self.controller.selected_rekening = None
+
+        self.controller.show_frame('PilihRekeningPage')
 
     def tkraise(self, *args, **kwargs):
         try:
